@@ -3,21 +3,19 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup } from 'firebase/auth';
 
-// --- Claves de API ---
-// NOTA: Se han insertado tus claves directamente para facilitar las pruebas.
-// Para un despliegue en producción, es MUY RECOMENDABLE mover estas claves
-// a "Environment Variables" en la configuración de Netlify para mayor seguridad,
-// tal y como se describe en la guía de despliegue.
-const EXERCISE_DB_API_KEY = "99af603688msh3ee0c9da98116e9p174272jsn3773c31651ff";
-const EDAMAM_APP_ID = "3909f263";
-const EDAMAM_APP_KEY = "f4a2577d1045eaae9be42322e59e2d7d";
+// --- Claves de API (REEMPLAZA CON LAS VARIABLES DE ENTORNO EN NETLIFY) ---
+// Estas son las claves que configuraste en Netlify
+const VITE_EXERCISE_DB_API_KEY = "99af603688msh3ee0c9da98116e9p174272jsn3773c31651ff";
+const VITE_EDAMAM_APP_ID = "3909f263";
+const VITE_EDAMAM_APP_KEY = "f4a2577d1045eaae9be42322e59e2d7d";
 
 
-// --- Configuración de Firebase (REEMPLAZA ESTO CON TU CÓDIGO) ---
+// --- Configuración de Firebase (DEBES REEMPLAZAR ESTO) ---
 const firebaseConfig = {
-  // Pega aquí el objeto firebaseConfig del Paso 5 de la guía de Firebase
+  // Pega aquí el objeto de configuración que obtuviste de Firebase
   // apiKey: "AIzaSy...",
   // authDomain: "...",
+  // projectId: "...",
   // ...
 };
 
@@ -27,7 +25,7 @@ const mockExercises = [
     { id: '002', name: 'Squat', bodyPart: 'Legs', equipment: 'Barbell', gifUrl: 'https://api.exercisedb.io/image/Y29tLmp1c3RpbC5hcHBzLmV4ZXJjaXNlZGIuZ2lmcy9naWZfYXNzZXRzLzAwMDMuZ2lm' },
 ];
 const mockFood = [
-    { foodId: 'food_mock_1', label: 'Manzana (de prueba)', nutrients: { ENERC_KCAL: 52 } },
+    { food: { foodId: 'food_mock_1', label: 'Manzana (de prueba)', nutrients: { ENERC_KCAL: 52 } } },
 ];
 
 
@@ -46,6 +44,7 @@ export default function App() {
     const [connections, setConnections] = useState({ googleFit: false, strava: false });
     const [routines, setRoutines] = useState([]);
 
+    // --- Efectos de Inicialización ---
     useEffect(() => {
         const timer = setTimeout(() => setShowSplash(false), 3000);
         return () => clearTimeout(timer);
@@ -53,35 +52,34 @@ export default function App() {
 
     useEffect(() => {
         if (firebaseConfig && firebaseConfig.apiKey) {
-            const app = initializeApp(firebaseConfig);
-            const authInstance = getAuth(app);
-            const dbInstance = getFirestore(app);
-            setAuth(authInstance);
-            setDb(dbInstance);
+            try {
+                const app = initializeApp(firebaseConfig);
+                const authInstance = getAuth(app);
+                const dbInstance = getFirestore(app);
+                setAuth(authInstance);
+                setDb(dbInstance);
 
-            const unsubscribeAuth = onAuthStateChanged(authInstance, (firebaseUser) => {
-                setUser(firebaseUser);
-                setAuthReady(true); 
-                
-                if (firebaseUser) {
-                    // Cargar rutinas del usuario logueado
-                    // NOTA: La ruta correcta debe ser `users/${firebaseUser.uid}/routines`
-                    const q = query(collection(dbInstance, `users/${firebaseUser.uid}/routines`));
-                    const unsubscribeRoutines = onSnapshot(q, (querySnapshot) => {
-                        const routinesData = [];
-                        querySnapshot.forEach((doc) => {
-                            routinesData.push({ id: doc.id, ...doc.data() });
+                const unsubscribeAuth = onAuthStateChanged(authInstance, (firebaseUser) => {
+                    setUser(firebaseUser);
+                    setAuthReady(true); 
+                    
+                    if (firebaseUser) {
+                        const q = query(collection(dbInstance, `users/${firebaseUser.uid}/routines`));
+                        onSnapshot(q, (querySnapshot) => {
+                            const routinesData = [];
+                            querySnapshot.forEach((doc) => {
+                                routinesData.push({ id: doc.id, ...doc.data() });
+                            });
+                            setRoutines(routinesData);
                         });
-                        setRoutines(routinesData);
-                    }, (error) => {
-                        console.error("Error al cargar rutinas: ", error);
-                    });
-                    // Idealmente, se debería gestionar la desuscripción de este listener.
-                } else {
-                    setRoutines([]); // Limpiar rutinas si el usuario cierra sesión
-                }
-            });
-            // En una app más compleja, se retornaría unsubscribeAuth para limpiar el efecto.
+                    } else {
+                        setRoutines([]);
+                    }
+                });
+            } catch (error) {
+                console.error("Error inicializando Firebase:", error);
+                setAuthReady(true); // Permitir que la app continúe en modo offline
+            }
         } else {
              console.warn("Configuración de Firebase no encontrada. La app funcionará en modo offline.");
              setAuthReady(true);
@@ -95,9 +93,11 @@ export default function App() {
         else setGreeting('Buenas noches');
     }, []);
     
+    // --- Manejadores de Estado ---
     const openModal = (type) => setModal({ type, isOpen: true });
     const closeModal = () => setModal({ type: null, isOpen: false });
 
+    // --- Lógica de Renderizado ---
     if (showSplash) return <SplashScreen />;
     if (!authReady) return <div className="fixed inset-0 bg-slate-900 flex items-center justify-center z-50"><p className="text-white">Cargando...</p></div>;
     if (!user) return <LoginScreen auth={auth} />;
@@ -215,6 +215,7 @@ const ReflectionModal = ({ onClose, db, user }) => {
 };
 const RoutineBuilderModal = ({ onClose, db, user }) => {
     const [routineName, setRoutineName] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
     const [selectedExercises, setSelectedExercises] = useState([]);
     const [exercises, setExercises] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -223,8 +224,8 @@ const RoutineBuilderModal = ({ onClose, db, user }) => {
 
     useEffect(() => {
         const fetchExercises = async () => {
-            if (!EXERCISE_DB_API_KEY) {
-                setError('API Key de ExerciseDB no encontrada. Usando datos de prueba.');
+            if (!VITE_EXERCISE_DB_API_KEY) {
+                setError('API Key no configurada.');
                 setExercises(mockExercises);
                 setIsLoading(false);
                 return;
@@ -232,7 +233,7 @@ const RoutineBuilderModal = ({ onClose, db, user }) => {
             const options = {
                 method: 'GET',
                 headers: {
-                    'X-RapidAPI-Key': EXERCISE_DB_API_KEY,
+                    'X-RapidAPI-Key': VITE_EXERCISE_DB_API_KEY,
                     'X-RapidAPI-Host': 'exercisedb.p.rapidapi.com'
                 }
             };
@@ -252,6 +253,13 @@ const RoutineBuilderModal = ({ onClose, db, user }) => {
         fetchExercises();
     }, []);
 
+    const filteredExercises = useMemo(() => {
+        return exercises.filter(ex => 
+            ex.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            ex.bodyPart.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    }, [searchQuery, exercises]);
+    
     const addExercise = (exercise) => {
         if (!selectedExercises.find(e => e.id === exercise.id)) {
             setSelectedExercises([...selectedExercises, { ...exercise, sets: 3, reps: 10 }]);
@@ -290,11 +298,11 @@ const RoutineBuilderModal = ({ onClose, db, user }) => {
             <div className="flex-grow flex flex-col md:flex-row overflow-hidden">
                 <div className="w-full md:w-1/2 flex flex-col p-4 overflow-y-auto">
                     <h3 className="text-lg font-semibold text-white mb-4">Biblioteca de Ejercicios</h3>
-                    <input type="text" placeholder="Buscar ejercicio (en inglés)..." className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 mb-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    {isLoading ? <p className="text-slate-500 text-center mt-8">Cargando ejercicios...</p> : null}
+                    <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder="Buscar ejercicio (en inglés)..." className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 mb-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                    {isLoading ? <p className="text-slate-500 text-center mt-8">Cargando más de 1300 ejercicios...</p> : null}
                     {error ? <p className="text-amber-400 text-center mt-8 text-sm p-2 bg-amber-900/50 rounded-md">{error}</p> : null}
                     <div className="space-y-3 mt-4">
-                        {exercises.slice(0, 50).map(ex => (
+                        {filteredExercises.slice(0, 50).map(ex => (
                             <div key={ex.id} className="bg-slate-800 p-3 rounded-lg flex items-center justify-between">
                                 <div className="flex items-center min-w-0">
                                     <img src={ex.gifUrl} alt={ex.name} className="w-14 h-14 rounded-md mr-4 bg-slate-700 flex-shrink-0" />
@@ -347,20 +355,20 @@ const FoodSearchModal = ({ onClose }) => {
         setIsLoading(true);
         setError(null);
         
-        if (!EDAMAM_APP_ID || !EDAMAM_APP_KEY) {
-            setError('API Keys de Edamam no encontradas. Usando datos de prueba.');
+        if (!VITE_EDAMAM_APP_ID || !VITE_EDAMAM_APP_KEY) {
+            setError('API Keys de Edamam no configuradas.');
             setResults(mockFood);
             setIsLoading(false);
             return;
         }
         
-        const url = `https://api.edamam.com/api/food-database/v2/parser?app_id=${EDAMAM_APP_ID}&app_key=${EDAMAM_APP_KEY}&ingr=${encodeURIComponent(searchTerm)}&nutrition-type=logging`;
+        const url = `https://api.edamam.com/api/food-database/v2/parser?app_id=${VITE_EDAMAM_APP_ID}&app_key=${VITE_EDAMAM_APP_KEY}&ingr=${encodeURIComponent(searchTerm)}&nutrition-type=logging`;
         
         try {
             const response = await fetch(url);
             if (!response.ok) throw new Error(`Error: ${response.statusText}`);
             const data = await response.json();
-            setResults(data.hints.map(item => item.food));
+            setResults(data.hints);
             if (data.hints.length === 0) setError('No se encontraron resultados.');
         } catch (err) {
             console.error("Error al buscar alimentos:", err);
@@ -382,9 +390,9 @@ const FoodSearchModal = ({ onClose }) => {
                 {isLoading && <p className="text-slate-500 text-center mt-8">Buscando...</p>}
                 {error && <p className="text-amber-400 text-center mt-8 text-sm p-2 bg-amber-900/50 rounded-md">{error}</p>}
                 <div className="space-y-3">
-                    {results.map(food => (
-                        <div key={food.foodId} className="bg-slate-800 p-3 rounded-lg flex items-center justify-between">
-                            <div><p className="font-bold text-white capitalize">{food.label}</p><p className="text-sm text-green-400">{Math.round(food.nutrients.ENERC_KCAL)} kcal por 100g</p></div>
+                    {results.map(item => (
+                        <div key={item.food.foodId} className="bg-slate-800 p-3 rounded-lg flex items-center justify-between">
+                            <div><p className="font-bold text-white capitalize">{item.food.label}</p><p className="text-sm text-green-400">{Math.round(item.food.nutrients.ENERC_KCAL)} kcal por 100g</p></div>
                             <button className="bg-green-600 rounded-full h-8 w-8 flex items-center justify-center text-white text-xl hover:bg-green-700">+</button>
                         </div>
                     ))}
@@ -463,7 +471,7 @@ const MindfulnessWidget = () => (
     <div className="bg-slate-800 p-6 rounded-lg"><h2 className="text-sm font-semibold text-purple-400 mb-2">PENSAMIENTO DEL DÍA</h2><p className="text-lg text-slate-300 italic">"La única vez que fallas es cuando no lo intentas."</p></div>
 );
 const ActivityWidget = () => (
-    <div className="bg-slate-800 p-6 rounded-lg"><h2 className="text-sm font-semibold text-blue-400 mb-4">ACTIVIDAD DE HOY</h2><div className="grid grid-cols-3 gap-4 text-center"><ProgressRing value={7500} goal={10000} label="Pasos" color="text-blue-500" displayValue="7.5k" /><ProgressRing value={450} goal={600} label="Kcal Quemadas" color="text-red-500" displayValue="450" /><ProgressRing value={50} goal={60} label="Ejercicio" color="text-green-500" displayValue="50 min" /></div></div>
+    <div className="bg-slate-800 p-6 rounded-lg"><h2 className="text-sm font-semibold text-blue-400 mb-4">ACTIVIDAD DE HOY</h2><div className="grid grid-cols-3 gap-4 text-center"><ProgressRing value={7500} goal={10000} label="Pasos" unit="k" color="text-blue-500" displayValue="7.5k" /><ProgressRing value={450} goal={600} label="Kcal Quemadas" unit="" color="text-red-500" displayValue="450" /><ProgressRing value={50} goal={60} label="Ejercicio" unit=" min" color="text-green-500" displayValue="50 min" /></div></div>
 );
 const NutritionWidget = () => (
      <div className="bg-slate-800 p-6 rounded-lg"><div className="flex justify-between items-center mb-2"><h2 className="text-sm font-semibold text-green-400">NUTRICIÓN</h2><span className="text-sm font-medium text-slate-300">1,650 / 2,500 kcal</span></div><div className="w-full bg-slate-700 rounded-full h-2.5"><div className="bg-green-500 h-2.5 rounded-full" style={{ width: '66%' }}></div></div></div>
