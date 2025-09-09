@@ -9,12 +9,15 @@ const EDAMAM_APP_ID = '3909f263';
 const EDAMAM_APP_KEY = 'f4a2577d1045eaae9be42322e59e2d7d';
 
 
-// --- Configuración de Firebase (REEMPLAZA ESTO CON TU CÓDIGO) ---
+// --- Configuración de Firebase (YA INCLUIDA) ---
 const firebaseConfig = {
-  // Pega aquí el objeto firebaseConfig del Paso 5 de la guía de Firebase
-  // apiKey: "AIzaSy...",
-  // authDomain: "...",
-  // ...
+  apiKey: "AIzaSyAppsBCeiDUnVqqENzIYU1Te9jO49WsMeY",
+  authDomain: "zenith-45e0b.firebaseapp.com",
+  projectId: "zenith-45e0b",
+  storageBucket: "zenith-45e0b.firebasestorage.app",
+  messagingSenderId: "99146745221",
+  appId: "1:99146745221:web:e1ad61c561916a0fa970ec",
+  measurementId: "G-SKG75K2RD1"
 };
 
 // --- DATOS DE PRUEBA (SOLO SI LAS APIS FALLAN) ---
@@ -423,7 +426,14 @@ const ProgressView = () => (
     <div className="animate-viewFadeIn"><h1 className="text-3xl font-bold text-white mb-6">Progreso</h1><div className="space-y-6"><div className="bg-slate-800 p-6 rounded-lg text-center"><p className="text-slate-400">Gráficos de Entrenamiento y Nutrición.</p></div><div className="bg-slate-800 p-6 rounded-lg"><h2 className="text-sm font-semibold text-purple-400 mb-2">RESUMEN MENTAL MENSUAL</h2><div className="aspect-video bg-slate-700 rounded-md flex items-center justify-center"><p className="text-slate-500 text-sm">Tu mosaico de palabras aparecerá aquí.</p></div></div></div></div>
 );
 const SplashScreen = () => (
-    <div className="fixed inset-0 bg-slate-900 flex items-center justify-center z-50"><h1 className="text-6xl font-thin text-white tracking-[1em]">{'ZENITH'.split('').map((letter, index) => (<span key={index} className="opacity-0 animate-letterFadeIn" style={{ animationDelay: `${0.2 * (index + 1)}s` }}>{letter}</span>))}</h1></div>
+    // --- ESTILOS CORREGIDOS PARA MÓVIL ---
+    <div className="fixed inset-0 bg-slate-900 flex items-center justify-center z-50 p-4">
+        <h1 className="text-4xl sm:text-6xl font-thin text-white tracking-[0.5em] sm:tracking-[1em] text-center">
+            {'ZENITH'.split('').map((letter, index) => (
+                <span key={index} className="opacity-0 animate-letterFadeIn" style={{ animationDelay: `${0.2 * (index + 1)}s` }}>{letter}</span>
+            ))}
+        </h1>
+    </div>
 );
 const DashboardView = ({ greeting, userName }) => (
     <div className="animate-viewFadeIn">
@@ -482,11 +492,11 @@ const ProgressRing = ({ value, goal, label, color, displayValue }) => {
 };
 const NavBar = ({ activeView, setActiveView, onAddClick }) => {
     const navItems = [
-        { id: 'inicio', label: 'Inicio', icon: <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /> },
-        { id: 'planes', label: 'Planes', icon: <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /> },
+        { id: 'inicio', label: 'Inicio', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /> },
+        { id: 'planes', label: 'Planes', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /> },
         { id: 'add', label: 'Add', isCentral: true },
-        { id: 'progreso', label: 'Progreso', icon: <path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /> },
-        { id: 'perfil', label: 'Perfil', icon: <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /> }
+        { id: 'progreso', label: 'Progreso', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /> },
+        { id: 'perfil', label: 'Perfil', icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /> }
     ];
     return (
          <nav className="bg-slate-800 border-t border-slate-700 grid grid-cols-5 items-center sticky bottom-0">
