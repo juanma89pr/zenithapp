@@ -1,7 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query } from 'firebase/firestore';
-import { getAuth, onAuthStateChanged, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup } from 'firebase/auth';
+import { 
+    getAuth, 
+    onAuthStateChanged, 
+    GoogleAuthProvider, 
+    signInWithPopup,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    RecaptchaVerifier,
+    signInWithPhoneNumber
+} from 'firebase/auth';
 
 // --- Claves de API (Insertadas directamente para el despliegue inicial) ---
 const EXERCISE_DB_API_KEY = '99af603688msh3ee0c9da98116e9p174272jsn3773c31651ff';
@@ -110,41 +119,149 @@ export default function App() {
 
 // --- PANTALLA DE LOGIN ---
 const LoginScreen = ({ auth }) => {
-    const handleSignIn = async (providerName) => {
+    const [loginView, setLoginView] = useState('options'); // 'options', 'email', 'phone'
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [phone, setPhone] = useState('');
+    const [otp, setOtp] = useState('');
+    const [error, setError] = useState('');
+    const [confirmationResult, setConfirmationResult] = useState(null);
+
+    const handleGoogleSignIn = async () => {
         if (!auth) {
-            alert("Firebase no está inicializado. No se puede iniciar sesión.");
+            setError("Firebase no está inicializado.");
             return;
         }
-        let provider;
-        if (providerName === 'google') provider = new GoogleAuthProvider();
-        else if (providerName === 'facebook') provider = new FacebookAuthProvider();
-        else return;
-
         try {
+            const provider = new GoogleAuthProvider();
             await signInWithPopup(auth, provider);
         } catch (error) {
-            console.error(`Error al iniciar sesión con ${providerName}:`, error);
+            console.error("Error con Google Sign In:", error);
+            setError("No se pudo iniciar sesión con Google.");
         }
     };
+
+    const handleEmailSignUp = async (e) => {
+        e.preventDefault();
+        setError('');
+        if (!auth) {
+             setError("Firebase no está inicializado.");
+             return;
+        }
+        try {
+            await createUserWithEmailAndPassword(auth, email, password);
+        } catch (error) {
+            setError("Error al registrarse: " + error.message);
+        }
+    };
+
+    const handleEmailSignIn = async (e) => {
+        e.preventDefault();
+        setError('');
+         if (!auth) {
+             setError("Firebase no está inicializado.");
+             return;
+        }
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+        } catch (error) {
+            setError("Error al iniciar sesión: " + error.message);
+        }
+    };
+    
+    const setupRecaptcha = () => {
+        if (!auth) {
+            setError("Firebase no está inicializado.");
+            return;
+        }
+        window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
+          'size': 'invisible',
+          'callback': (response) => {
+            // reCAPTCHA solved, allow signInWithPhoneNumber.
+          }
+        });
+    }
+
+    const handlePhoneSignIn = async (e) => {
+        e.preventDefault();
+        setError('');
+        setupRecaptcha();
+        const appVerifier = window.recaptchaVerifier;
+        const formattedPhone = `+34${phone}`; // Asumiendo código de España
+        try {
+            const result = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
+            setConfirmationResult(result);
+        } catch (error) {
+            console.error("Error con SMS:", error);
+            setError("No se pudo enviar el SMS. ¿El número es correcto?");
+        }
+    }
+
+    const handleOtpSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        if (!confirmationResult) return;
+        try {
+            await confirmationResult.confirm(otp);
+        } catch (error) {
+            setError("Código incorrecto. Inténtalo de nuevo.");
+        }
+    }
 
     return (
         <div className="max-w-md mx-auto h-screen flex flex-col justify-center items-center bg-slate-900 p-8">
             <h1 className="text-5xl font-thin text-white tracking-[0.5em] mb-4">ZENITH</h1>
             <p className="text-slate-400 text-center mb-12">Empieza tu viaje hacia una mejor versión de ti mismo.</p>
             
-            <div className="w-full space-y-4">
-                <button onClick={() => handleSignIn('google')} className="w-full flex items-center justify-center bg-white text-slate-800 font-medium py-3 px-4 rounded-lg hover:bg-slate-200 transition-colors">
-                    <svg className="w-6 h-6 mr-3" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C42.012 36.49 44 30.861 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg>
-                    Continuar con Google
-                </button>
-                 <button onClick={() => handleSignIn('facebook')} className="w-full flex items-center justify-center bg-[#1877F2] text-white font-medium py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">
-                    <svg className="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878V14.89h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"></path></svg>
-                    Continuar con Facebook
-                </button>
-            </div>
+            {error && <p className="bg-red-900/50 text-red-300 p-3 rounded-md mb-4 text-center">{error}</p>}
+            <div id="recaptcha-container"></div>
+
+            {loginView === 'options' && (
+                <div className="w-full space-y-4">
+                    <button onClick={handleGoogleSignIn} className="w-full flex items-center justify-center bg-white text-slate-800 font-medium py-3 px-4 rounded-lg hover:bg-slate-200 transition-colors">
+                        <svg className="w-6 h-6 mr-3" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8c-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C12.955 4 4 12.955 4 24s8.955 20 20 20s20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"></path><path fill="#FF3D00" d="M6.306 14.691l6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4C16.318 4 9.656 8.337 6.306 14.691z"></path><path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238C29.211 35.091 26.715 36 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"></path><path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303c-.792 2.237-2.231 4.166-4.087 5.571l6.19 5.238C42.012 36.49 44 30.861 44 24c0-1.341-.138-2.65-.389-3.917z"></path></svg>
+                        Continuar con Google
+                    </button>
+                    <button onClick={() => setLoginView('email')} className="w-full bg-slate-700 text-white font-medium py-3 px-4 rounded-lg hover:bg-slate-600 transition-colors">Usar Correo Electrónico</button>
+                    <button onClick={() => setLoginView('phone')} className="w-full bg-slate-700 text-white font-medium py-3 px-4 rounded-lg hover:bg-slate-600 transition-colors">Usar Teléfono</button>
+                </div>
+            )}
+
+            {loginView === 'email' && (
+                <form className="w-full space-y-4">
+                    <input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="Correo electrónico" className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" />
+                    <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Contraseña (mín. 6 caracteres)" className="w-full bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" />
+                    <div className="flex space-x-4">
+                        <button onClick={handleEmailSignIn} className="w-full bg-purple-600 text-white font-medium py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors">Iniciar Sesión</button>
+                        <button onClick={handleEmailSignUp} className="w-full bg-slate-700 text-white font-medium py-3 px-4 rounded-lg hover:bg-slate-600 transition-colors">Registrarse</button>
+                    </div>
+                    <button onClick={() => setLoginView('options')} className="w-full text-slate-400 mt-4 text-sm">Volver a otras opciones</button>
+                </form>
+            )}
+
+            {loginView === 'phone' && !confirmationResult && (
+                 <form onSubmit={handlePhoneSignIn} className="w-full space-y-4">
+                    <div className="flex items-center bg-slate-800 border border-slate-700 rounded-lg p-3 focus-within:ring-2 focus-within:ring-purple-500">
+                        <span className="text-slate-400 pr-2 border-r border-slate-600">+34</span>
+                        <input type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="Número de teléfono" className="w-full bg-transparent pl-2 text-white focus:outline-none" />
+                    </div>
+                    <button type="submit" className="w-full bg-purple-600 text-white font-medium py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors">Enviar SMS</button>
+                    <button onClick={() => setLoginView('options')} className="w-full text-slate-400 mt-4 text-sm">Volver a otras opciones</button>
+                </form>
+            )}
+
+            {loginView === 'phone' && confirmationResult && (
+                 <form onSubmit={handleOtpSubmit} className="w-full space-y-4">
+                    <p className="text-slate-400 text-sm text-center">Introduce el código de 6 dígitos que te hemos enviado.</p>
+                    <input type="text" value={otp} onChange={e => setOtp(e.target.value)} placeholder="Código de verificación" className="w-full text-center tracking-[0.5em] bg-slate-800 border border-slate-700 rounded-lg p-3 text-white focus:outline-none focus:ring-2 focus:ring-purple-500" />
+                    <button type="submit" className="w-full bg-purple-600 text-white font-medium py-3 px-4 rounded-lg hover:bg-purple-700 transition-colors">Verificar</button>
+                    <button onClick={() => setConfirmationResult(null)} className="w-full text-slate-400 mt-4 text-sm">Volver a introducir el número</button>
+                </form>
+            )}
         </div>
     );
 };
+
 
 // --- MODALES ---
 const AddModal = ({ onClose, openModal }) => (
@@ -427,8 +544,8 @@ const ProgressView = () => (
 );
 const SplashScreen = () => (
     // --- ESTILOS CORREGIDOS PARA MÓVIL ---
-    <div className="fixed inset-0 bg-slate-900 flex items-center justify-center z-50 p-4">
-        <h1 className="text-4xl sm:text-6xl font-thin text-white tracking-[0.5em] sm:tracking-[1em] text-center">
+    <div className="fixed inset-0 bg-slate-900 flex items-center justify-center z-50 p-4 w-full">
+        <h1 className="text-4xl sm:text-6xl font-thin text-white tracking-[0.5em] sm:tracking-[1em] text-center w-full">
             {'ZENITH'.split('').map((letter, index) => (
                 <span key={index} className="opacity-0 animate-letterFadeIn" style={{ animationDelay: `${0.2 * (index + 1)}s` }}>{letter}</span>
             ))}
