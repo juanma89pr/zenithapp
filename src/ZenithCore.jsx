@@ -16,6 +16,8 @@ import {
 const EXERCISE_DB_API_KEY = '99af603688msh3ee0c9da98116e9p174272jsn3773c31651ff';
 const EDAMAM_APP_ID = '3909f263';
 const EDAMAM_APP_KEY = 'f4a2577d1045eaae9be42322e59e2d7d';
+// --- ¡TU ID DE CLIENTE PARA GOOGLE FIT! ---
+const GOOGLE_FIT_CLIENT_ID = '99146745221-fgs0u4jhq62io786633bta1gln3kjdkj.apps.googleusercontent.com';
 
 
 // --- Configuración de Firebase (YA INCLUIDA) ---
@@ -53,6 +55,13 @@ export default function App() {
     
     const [connections, setConnections] = useState({ googleFit: false, strava: false });
     const [routines, setRoutines] = useState([]);
+    
+    const [activityData, setActivityData] = useState({
+        steps: 0,
+        calories: 0,
+        exerciseTime: 0,
+        isLoading: true,
+    });
 
     useEffect(() => {
         const timer = setTimeout(() => setShowSplash(false), 3000);
@@ -72,14 +81,18 @@ export default function App() {
                 setAuthReady(true); 
                 
                 if (firebaseUser) {
-                    const q = query(collection(dbInstance, `users/${firebaseUser.uid}/routines`));
-                    onSnapshot(q, (querySnapshot) => {
+                    const qRoutines = query(collection(dbInstance, `users/${firebaseUser.uid}/routines`));
+                    onSnapshot(qRoutines, (querySnapshot) => {
                         const routinesData = [];
                         querySnapshot.forEach((doc) => {
                             routinesData.push({ id: doc.id, ...doc.data() });
                         });
                         setRoutines(routinesData);
                     });
+                    
+                    // Al iniciar, dejamos de simular y esperamos la conexión manual
+                     setActivityData(prev => ({...prev, isLoading: false}));
+
                 } else {
                     setRoutines([]);
                 }
@@ -106,7 +119,17 @@ export default function App() {
 
     return (
         <div className="max-w-md mx-auto h-screen flex flex-col bg-slate-900 text-slate-200 font-sans">
-            <MainContent activeView={activeView} greeting={greeting} connections={connections} setConnections={setConnections} openModal={openModal} routines={routines} userName={user?.displayName}/>
+            <MainContent 
+                activeView={activeView} 
+                greeting={greeting} 
+                connections={connections} 
+                setConnections={setConnections} 
+                openModal={openModal} 
+                routines={routines} 
+                userName={user?.displayName}
+                activityData={activityData}
+                setActivityData={setActivityData}
+            />
             <NavBar activeView={activeView} setActiveView={setActiveView} onAddClick={() => openModal('add_choice')} />
             
             {modal.isOpen && modal.type === 'add_choice' && <AddModal onClose={closeModal} openModal={openModal} />}
@@ -119,7 +142,7 @@ export default function App() {
 
 // --- PANTALLA DE LOGIN ---
 const LoginScreen = ({ auth }) => {
-    const [loginView, setLoginView] = useState('options'); // 'options', 'email', 'phone'
+    const [loginView, setLoginView] = useState('options');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [phone, setPhone] = useState('');
@@ -176,9 +199,7 @@ const LoginScreen = ({ auth }) => {
         }
         window.recaptchaVerifier = new RecaptchaVerifier(auth, 'recaptcha-container', {
           'size': 'invisible',
-          'callback': (response) => {
-            // reCAPTCHA solved, allow signInWithPhoneNumber.
-          }
+          'callback': (response) => {}
         });
     }
 
@@ -187,7 +208,7 @@ const LoginScreen = ({ auth }) => {
         setError('');
         setupRecaptcha();
         const appVerifier = window.recaptchaVerifier;
-        const formattedPhone = `+34${phone}`; // Asumiendo código de España
+        const formattedPhone = `+34${phone}`;
         try {
             const result = await signInWithPhoneNumber(auth, formattedPhone, appVerifier);
             setConfirmationResult(result);
@@ -506,12 +527,12 @@ const FoodSearchModal = ({ onClose }) => {
 
 
 // --- VISTAS Y COMPONENTES ---
-const MainContent = ({ activeView, greeting, connections, setConnections, openModal, routines, userName }) => (
+const MainContent = ({ activeView, greeting, connections, setConnections, openModal, routines, userName, activityData, setActivityData }) => (
     <main className="flex-grow p-6 overflow-y-auto">
-        {activeView === 'inicio' && <DashboardView greeting={greeting} userName={userName} />}
+        {activeView === 'inicio' && <DashboardView greeting={greeting} userName={userName} activityData={activityData} />}
         {activeView === 'planes' && <PlanesView onAddRoutine={() => openModal('routine_builder')} routines={routines} />}
         {activeView === 'progreso' && <ProgressView />}
-        {activeView === 'perfil' && <ProfileView connections={connections} setConnections={setConnections} />}
+        {activeView === 'perfil' && <ProfileView connections={connections} setConnections={setConnections} setActivityData={setActivityData} />}
     </main>
 );
 const PlanesView = ({ onAddRoutine, routines }) => {
@@ -543,7 +564,6 @@ const ProgressView = () => (
     <div className="animate-viewFadeIn"><h1 className="text-3xl font-bold text-white mb-6">Progreso</h1><div className="space-y-6"><div className="bg-slate-800 p-6 rounded-lg text-center"><p className="text-slate-400">Gráficos de Entrenamiento y Nutrición.</p></div><div className="bg-slate-800 p-6 rounded-lg"><h2 className="text-sm font-semibold text-purple-400 mb-2">RESUMEN MENTAL MENSUAL</h2><div className="aspect-video bg-slate-700 rounded-md flex items-center justify-center"><p className="text-slate-500 text-sm">Tu mosaico de palabras aparecerá aquí.</p></div></div></div></div>
 );
 const SplashScreen = () => (
-    // --- ESTILOS CORREGIDOS PARA MÓVIL ---
     <div className="fixed inset-0 bg-slate-900 flex items-center justify-center z-50 p-4 w-full">
         <h1 className="text-4xl sm:text-6xl font-thin text-white tracking-[0.5em] sm:tracking-[1em] text-center w-full">
             {'ZENITH'.split('').map((letter, index) => (
@@ -552,20 +572,108 @@ const SplashScreen = () => (
         </h1>
     </div>
 );
-const DashboardView = ({ greeting, userName }) => (
+const DashboardView = ({ greeting, userName, activityData }) => (
     <div className="animate-viewFadeIn">
         <h1 className="text-3xl font-bold text-white mb-1">{greeting}, {userName ? userName.split(' ')[0] : '¡vamos allá'}!</h1>
         <p className="text-slate-400 mb-8">Aquí tienes el resumen de tu día.</p>
         <div className="space-y-6">
             <MindfulnessWidget />
-            <ActivityWidget />
+            <ActivityWidget activityData={activityData} />
             <NutritionWidget />
         </div>
     </div>
 );
-const ProfileView = ({ connections, setConnections }) => {
-    const handleGoogleFitConnect = () => setConnections(prev => ({ ...prev, googleFit: !prev.googleFit }));
-    const handleStravaConnect = () => setConnections(prev => ({ ...prev, strava: !prev.strava }));
+const ProfileView = ({ connections, setConnections, setActivityData }) => {
+    
+    const fetchGoogleFitData = async (token) => {
+        setActivityData(prev => ({ ...prev, isLoading: true }));
+        const now = new Date();
+        const startTimeMillis = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+        const endTimeMillis = now.getTime();
+
+        try {
+            const response = await fetch(`https://www.googleapis.com/fitness/v1/users/me/dataset:aggregate`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token.access_token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    aggregateBy: [{ dataTypeName: "com.google.step_count.delta" }],
+                    bucketByTime: { durationMillis: 86400000 },
+                    startTimeMillis: startTimeMillis,
+                    endTimeMillis: endTimeMillis
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`Google Fit API error! status: ${response.status}`);
+            }
+
+            const data = await response.json();
+            let steps = 0;
+            if (data.bucket && data.bucket.length > 0 && data.bucket[0].dataset[0].point.length > 0) {
+                steps = data.bucket[0].dataset[0].point[0].value[0].intVal || 0;
+            }
+            setActivityData({ steps, calories: 0, exerciseTime: 0, isLoading: false });
+        } catch (error) {
+            console.error("Error fetching Google Fit data:", error);
+            setActivityData(prev => ({ ...prev, isLoading: false }));
+        }
+    };
+
+    const handleGoogleFitConnect = () => {
+        const loadGapiScript = (callback) => {
+            const existingScript = document.getElementById('google-api-script');
+            if (!existingScript) {
+                const script = document.createElement('script');
+                script.src = 'https://apis.google.com/js/api.js';
+                script.id = 'google-api-script';
+                document.body.appendChild(script);
+                script.onload = () => {
+                    setTimeout(() => {
+                        if(window.gapi) {
+                           window.gapi.load('client', callback);
+                        }
+                    }, 500);
+                };
+            }
+            if (existingScript && callback) callback();
+        };
+
+        const initClient = () => {
+             const tokenClient = window.google.accounts.oauth2.initTokenClient({
+                client_id: GOOGLE_FIT_CLIENT_ID,
+                scope: 'https://www.googleapis.com/auth/fitness.activity.read',
+                callback: (tokenResponse) => {
+                    if (tokenResponse && tokenResponse.access_token) {
+                        setConnections(prev => ({ ...prev, googleFit: true }));
+                        fetchGoogleFitData(tokenResponse);
+                    }
+                },
+            });
+            tokenClient.requestAccessToken();
+        };
+
+        loadGapiScript(() => {
+            const gsiScript = document.getElementById('google-gsi-script');
+            if (!gsiScript) {
+                const script = document.createElement('script');
+                script.src = 'https://accounts.google.com/gsi/client';
+                script.id = 'google-gsi-script';
+                script.onload = initClient;
+                document.body.appendChild(script);
+            } else {
+                initClient();
+            }
+        });
+    };
+
+    const handleStravaConnect = () => {
+        console.log("Iniciando conexión con Strava...");
+        setConnections(prev => ({ ...prev, strava: !prev.strava }));
+    };
+
     return (
         <div className="animate-viewFadeIn">
             <h1 className="text-3xl font-bold text-white mb-6">Perfil</h1>
@@ -587,16 +695,36 @@ const ProfileView = ({ connections, setConnections }) => {
 const MindfulnessWidget = () => (
     <div className="bg-slate-800 p-6 rounded-lg"><h2 className="text-sm font-semibold text-purple-400 mb-2">PENSAMIENTO DEL DÍA</h2><p className="text-lg text-slate-300 italic">"La única vez que fallas es cuando no lo intentas."</p></div>
 );
-const ActivityWidget = () => (
-    <div className="bg-slate-800 p-6 rounded-lg"><h2 className="text-sm font-semibold text-blue-400 mb-4">ACTIVIDAD DE HOY</h2><div className="grid grid-cols-3 gap-4 text-center"><ProgressRing value={7500} goal={10000} label="Pasos" unit="k" color="text-blue-500" displayValue="7.5k" /><ProgressRing value={450} goal={600} label="Kcal Quemadas" unit="" color="text-red-500" displayValue="450" /><ProgressRing value={50} goal={60} label="Ejercicio" unit=" min" color="text-green-500" displayValue="50 min" /></div></div>
-);
+const ActivityWidget = ({ activityData }) => {
+    const { steps, calories, exerciseTime, isLoading } = activityData;
+
+    if (isLoading) {
+        return (
+            <div className="bg-slate-800 p-6 rounded-lg">
+                <h2 className="text-sm font-semibold text-blue-400 mb-4">ACTIVIDAD DE HOY</h2>
+                <div className="text-center text-slate-400">Cargando datos...</div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="bg-slate-800 p-6 rounded-lg">
+            <h2 className="text-sm font-semibold text-blue-400 mb-4">ACTIVIDAD DE HOY</h2>
+            <div className="grid grid-cols-3 gap-4 text-center">
+                <ProgressRing value={steps} goal={10000} label="Pasos" color="text-blue-500" displayValue={(steps / 1000).toFixed(1) + 'k'} />
+                <ProgressRing value={calories} goal={600} label="Kcal Quemadas" color="text-red-500" displayValue={calories} />
+                <ProgressRing value={exerciseTime} goal={60} label="Ejercicio" color="text-green-500" displayValue={exerciseTime + ' min'} />
+            </div>
+        </div>
+    );
+};
 const NutritionWidget = () => (
      <div className="bg-slate-800 p-6 rounded-lg"><div className="flex justify-between items-center mb-2"><h2 className="text-sm font-semibold text-green-400">NUTRICIÓN</h2><span className="text-sm font-medium text-slate-300">1,650 / 2,500 kcal</span></div><div className="w-full bg-slate-700 rounded-full h-2.5"><div className="bg-green-500 h-2.5 rounded-full" style={{ width: '66%' }}></div></div></div>
 );
 const ProgressRing = ({ value, goal, label, color, displayValue }) => {
     const radius = 34;
     const circumference = 2 * Math.PI * radius;
-    const offset = circumference - (value / goal) * circumference;
+    const offset = goal > 0 ? circumference - (value / goal) * circumference : circumference;
     return (
         <div>
             <div className="relative inline-flex items-center justify-center">
