@@ -16,7 +16,6 @@ import {
 const EXERCISE_DB_API_KEY = '99af603688msh3ee0c9da98116e9p174272jsn3773c31651ff';
 const EDAMAM_APP_ID = '3909f263';
 const EDAMAM_APP_KEY = 'f4a2577d1045eaae9be42322e59e2d7d';
-// --- ¡TU ID DE CLIENTE PARA GOOGLE FIT! ---
 const GOOGLE_FIT_CLIENT_ID = '99146745221-fgs0u4jhq62io786633bta1gln3kjdkj.apps.googleusercontent.com';
 
 
@@ -30,15 +29,6 @@ const firebaseConfig = {
   appId: "1:99146745221:web:e1ad61c561916a0fa970ec",
   measurementId: "G-SKG75K2RD1"
 };
-
-// --- DATOS DE PRUEBA (SOLO SI LAS APIS FALLAN) ---
-const mockExercises = [
-    { id: '001', name: 'Bench Press', bodyPart: 'Chest', equipment: 'Barbell', gifUrl: 'https://api.exercisedb.io/image/Y29tLmp1c3RpbC5hcHBzLmV4ZXJjaXNlZGIuZ2lmcy9naWZfYXNzZXRzLzAwMjUuZ2lm' },
-    { id: '002', name: 'Squat', bodyPart: 'Legs', equipment: 'Barbell', gifUrl: 'https://api.exercisedb.io/image/Y29tLmp1c3RpbC5hcHBzLmV4ZXJjaXNlZGIuZ2lmcy9naWZfYXNzZXRzLzAwMDMuZ2lm' },
-];
-const mockFood = [
-    { foodId: 'food_mock_1', label: 'Manzana (de prueba)', nutrients: { ENERC_KCAL: 52 } },
-];
 
 
 // --- Componente Principal de la App ---
@@ -89,16 +79,13 @@ export default function App() {
                         });
                         setRoutines(routinesData);
                     });
-                    
-                    // Al iniciar, dejamos de simular y esperamos la conexión manual
                      setActivityData(prev => ({...prev, isLoading: false}));
-
                 } else {
                     setRoutines([]);
                 }
             });
         } else {
-             console.warn("Configuración de Firebase no encontrada. La app funcionará en modo offline.");
+             console.warn("Configuración de Firebase no encontrada.");
              setAuthReady(true);
         }
     }, []);
@@ -354,12 +341,8 @@ const RoutineBuilderModal = ({ onClose, db, user }) => {
 
     useEffect(() => {
         const fetchExercises = async () => {
-            if (!EXERCISE_DB_API_KEY) {
-                setError('API Key de ExerciseDB no encontrada.');
-                setExercises(mockExercises);
-                setIsLoading(false);
-                return;
-            }
+            setIsLoading(true);
+            setError(null);
             const options = {
                 method: 'GET',
                 headers: {
@@ -374,8 +357,7 @@ const RoutineBuilderModal = ({ onClose, db, user }) => {
                 setExercises(data);
             } catch (err) {
                 console.error("Error al cargar ejercicios:", err);
-                setError('No se pudo conectar. Mostrando ejemplos.');
-                setExercises(mockExercises);
+                setError('No se pudo conectar con la base de datos de ejercicios.');
             } finally {
                 setIsLoading(false);
             }
@@ -422,8 +404,8 @@ const RoutineBuilderModal = ({ onClose, db, user }) => {
                 <div className="w-full md:w-1/2 flex flex-col p-4 overflow-y-auto">
                     <h3 className="text-lg font-semibold text-white mb-4">Biblioteca de Ejercicios</h3>
                     <input type="text" placeholder="Buscar ejercicio (en inglés)..." className="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 mb-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500" />
-                    {isLoading ? <p className="text-slate-500 text-center mt-8">Cargando ejercicios...</p> : null}
-                    {error ? <p className="text-amber-400 text-center mt-8 text-sm p-2 bg-amber-900/50 rounded-md">{error}</p> : null}
+                    {isLoading && <p className="text-slate-500 text-center mt-8">Cargando más de 1.300 ejercicios...</p>}
+                    {error && <p className="text-amber-400 text-center mt-8 text-sm p-2 bg-amber-900/50 rounded-md">{error}</p>}
                     <div className="space-y-3 mt-4">
                         {exercises.slice(0, 50).map(ex => (
                             <div key={ex.id} className="bg-slate-800 p-3 rounded-lg flex items-center justify-between">
@@ -478,13 +460,6 @@ const FoodSearchModal = ({ onClose }) => {
         setIsLoading(true);
         setError(null);
         
-        if (!EDAMAM_APP_ID || !EDAMAM_APP_KEY) {
-            setError('API Keys de Edamam no encontradas.');
-            setResults(mockFood);
-            setIsLoading(false);
-            return;
-        }
-        
         const url = `https://api.edamam.com/api/food-database/v2/parser?app_id=${EDAMAM_APP_ID}&app_key=${EDAMAM_APP_KEY}&ingr=${encodeURIComponent(searchTerm)}&nutrition-type=logging`;
         
         try {
@@ -492,11 +467,10 @@ const FoodSearchModal = ({ onClose }) => {
             if (!response.ok) throw new Error(`Error: ${response.statusText}`);
             const data = await response.json();
             setResults(data.hints.map(item => item.food));
-            if (data.hints.length === 0) setError('No se encontraron resultados.');
+            if (data.hints.length === 0) setError('No se encontraron resultados para tu búsqueda.');
         } catch (err) {
             console.error("Error al buscar alimentos:", err);
-            setError('No se pudo conectar. Mostrando ejemplos.');
-            setResults(mockFood);
+            setError('No se pudo conectar con la base de datos de alimentos.');
         } finally {
             setIsLoading(false);
         }
@@ -615,7 +589,7 @@ const ProfileView = ({ connections, setConnections, setActivityData }) => {
             if (data.bucket && data.bucket.length > 0 && data.bucket[0].dataset[0].point.length > 0) {
                 steps = data.bucket[0].dataset[0].point[0].value[0].intVal || 0;
             }
-            setActivityData({ steps, calories: 0, exerciseTime: 0, isLoading: false });
+            setActivityData({ steps, calories: Math.round(steps * 0.04), exerciseTime: 0, isLoading: false });
         } catch (error) {
             console.error("Error fetching Google Fit data:", error);
             setActivityData(prev => ({ ...prev, isLoading: false }));
@@ -719,7 +693,7 @@ const ActivityWidget = ({ activityData }) => {
     );
 };
 const NutritionWidget = () => (
-     <div className="bg-slate-800 p-6 rounded-lg"><div className="flex justify-between items-center mb-2"><h2 className="text-sm font-semibold text-green-400">NUTRICIÓN</h2><span className="text-sm font-medium text-slate-300">1,650 / 2,500 kcal</span></div><div className="w-full bg-slate-700 rounded-full h-2.5"><div className="bg-green-500 h-2.5 rounded-full" style={{ width: '66%' }}></div></div></div>
+     <div className="bg-slate-800 p-6 rounded-lg"><div className="flex justify-between items-center mb-2"><h2 className="text-sm font-semibold text-green-400">NUTRICIÓN</h2><span className="text-sm font-medium text-slate-300">Aún sin registros</span></div><div className="w-full bg-slate-700 rounded-full h-2.5"><div className="bg-green-500 h-2.5 rounded-full" style={{ width: '0%' }}></div></div></div>
 );
 const ProgressRing = ({ value, goal, label, color, displayValue }) => {
     const radius = 34;
