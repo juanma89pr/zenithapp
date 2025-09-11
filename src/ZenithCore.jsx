@@ -30,36 +30,44 @@ const firebaseConfig = {
   measurementId: "G-SKG75K2RD1"
 };
 
-// --- Nueva Pantalla de Bienvenida (Splash Screen) con la animación ZenIt ---
-const ZenItSplashScreen = () => (
-    <div className="fixed inset-0 bg-slate-900 flex flex-col justify-center items-center z-50 animate-splashFadeOut">
-        <div className="relative h-20 w-64 flex items-center justify-center text-7xl font-semibold text-slate-200">
-            <span className="splash-letter splash-z">Z</span>
-            <span className="splash-letter splash-en">en</span>
-            <span className="splash-letter splash-i">I</span>
-            <span className="splash-letter splash-t">t</span>
+// --- URLs de los iconos PNG (reemplazar con tus PNG finales) ---
+const ICON_URLS = {
+    KETTLEBELL: 'https://i.ibb.co/L8y2zLp/kettlebell-icon.png', // 
+    LEAF: 'https://i.ibb.co/bFzV0Jk/leaf-icon.png', // 
+    WAVES: 'https://i.ibb.co/3cY4zvh/waves-icon.png' // 
+};
+
+
+// --- Pantalla de Bienvenida con Animación React ---
+const ZenItSplashScreen = () => {
+    const [animationStep, setAnimationStep] = useState(0);
+
+    useEffect(() => {
+        const timers = [
+            setTimeout(() => setAnimationStep(1), 100),    // Z e I aparecen
+            setTimeout(() => setAnimationStep(2), 800),   // Z e I se deslizan
+            setTimeout(() => setAnimationStep(3), 1500),  // en y t aparecen
+            setTimeout(() => setAnimationStep(4), 2500)   // Iconos aparecen
+        ];
+        return () => timers.forEach(clearTimeout);
+    }, []);
+
+    return (
+        <div className="fixed inset-0 bg-slate-900 flex flex-col justify-center items-center z-50 animate-splashFadeOut">
+            <div className="relative h-20 w-64 flex items-center justify-center text-7xl font-semibold text-slate-200">
+                <span className={`splash-outer ${animationStep >= 1 ? 'visible' : ''} ${animationStep >= 2 ? 'slide-z' : ''}`}>Z</span>
+                <span className={`splash-middle ${animationStep >= 3 ? 'visible' : ''}`}>en</span>
+                <span className={`splash-outer ${animationStep >= 1 ? 'visible' : ''} ${animationStep >= 2 ? 'slide-i' : ''}`}>I</span>
+                <span className={`splash-middle ${animationStep >= 3 ? 'visible' : ''}`}>t</span>
+            </div>
+            <div className={`flex justify-center gap-10 mt-8 transition-opacity duration-700 ${animationStep >= 4 ? 'opacity-100' : 'opacity-0'}`}>
+                <img src={ICON_URLS.KETTLEBELL} alt="Deporte" className="pillar-icon" />
+                <img src={ICON_URLS.LEAF} alt="Nutrición" className="pillar-icon" />
+                <img src={ICON_URLS.WAVES} alt="Mindfulness" className="pillar-icon" />
+            </div>
         </div>
-        <div className="flex justify-center gap-10 mt-8 pillars-container">
-            {/* Icono Deporte: Kettlebell */}
-            <svg className="pillar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M6.5 6.5a2.5 2.5 0 0 1 5 0V7h-5v-.5Z"/>
-                <path d="M12.5 6.5a2.5 2.5 0 0 1 5 0V7h-5v-.5Z"/>
-                <path d="M9 7v2.8a6.5 6.5 0 0 0-5 6.2 6.5 6.5 0 0 0 6.5 6.5h3A6.5 6.5 0 0 0 20 16a6.5 6.5 0 0 0-5-6.2V7"/>
-                <path d="M9 7h6"/>
-            </svg>
-            {/* Icono Nutrición: Hoja */}
-            <svg className="pillar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M2 22c4.42-4.42 4.42-11.58 0-16C6.42-2.42 13.58-2.42 18 2c4.42 4.42 4.42 11.58 0 16-4.42 4.42-11.58 4.42-16 0Z"/>
-                <path d="m15 9-6 6"/>
-                <path d="M16 14c.5-.5 1-1.5.5-2.5s-2-1-2.5.5"/>
-            </svg>
-            {/* Icono Mindfulness: Ondas de calma */}
-            <svg className="pillar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                 <path d="M3 12h.01"/><path d="M7 12h.01"/><path d="M11 12h.01"/><path d="M15 12h.01"/><path d="M19 12h.01"/>
-            </svg>
-        </div>
-    </div>
-);
+    );
+};
 
 
 // --- Componente Principal de la App ---
@@ -85,7 +93,7 @@ export default function App() {
     });
 
     useEffect(() => {
-        // Duración de la nueva animación: 4 segundos
+        // Duración de la animación: 4 segundos
         const timer = setTimeout(() => setShowSplash(false), 4000);
         return () => clearTimeout(timer);
     }, []);
@@ -305,23 +313,22 @@ const LoginScreen = ({ auth }) => {
 };
 
 
-// --- MODALES (RESTO DEL CÓDIGO SIN CAMBIOS, PEGADO DEBAJO) ---
-// ... (El resto del código de modales, vistas, widgets, etc. permanece igual)
+// --- MODALES (CON ICONOS PNG ACTUALIZADOS) ---
 const AddModal = ({ onClose, openModal }) => (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-40" onClick={onClose}>
         <div className="bg-slate-800 rounded-lg p-6 w-11/12 max-w-sm text-center" onClick={e => e.stopPropagation()}>
              <h2 className="text-xl font-bold text-white mb-6">¿Qué quieres registrar?</h2>
              <div className="space-y-4">
                 <button className="w-full flex flex-col items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-4 rounded-lg transition-colors border-b-4 border-blue-500">
-                     <svg className="h-10 w-10 mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5a2.5 2.5 0 0 1 5 0V7h-5v-.5Z"/><path d="M12.5 6.5a2.5 2.5 0 0 1 5 0V7h-5v-.5Z"/><path d="M9 7v2.8a6.5 6.5 0 0 0-5 6.2 6.5 6.5 0 0 0 6.5 6.5h3A6.5 6.5 0 0 0 20 16a6.5 6.5 0 0 0-5-6.2V7"/><path d="M9 7h6"/></svg>
+                     <img src={ICON_URLS.KETTLEBELL} alt="Entrenamiento" className="h-10 w-10 mb-2" />
                      Entrenamiento
                 </button>
                 <button onClick={() => { onClose(); openModal('food_search'); }} className="w-full flex flex-col items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-4 rounded-lg transition-colors border-b-4 border-green-500">
-                    <svg className="h-10 w-10 mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 22c4.42-4.42 4.42-11.58 0-16C6.42-2.42 13.58-2.42 18 2c4.42 4.42 4.42 11.58 0 16-4.42 4.42-11.58 4.42-16 0Z"/><path d="m15 9-6 6"/><path d="M16 14c.5-.5 1-1.5.5-2.5s-2-1-2.5.5"/></svg>
+                    <img src={ICON_URLS.LEAF} alt="Comida" className="h-10 w-10 mb-2" />
                     Comida
                 </button>
                 <button onClick={() => { onClose(); openModal('reflection'); }} className="w-full flex flex-col items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-4 rounded-lg transition-colors border-b-4 border-purple-500">
-                    <svg className="h-10 w-10 mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h.01"/><path d="M7 12h.01"/><path d="M11 12h.01"/><path d="M15 12h.01"/><path d="M19 12h.01"/></svg>
+                    <img src={ICON_URLS.WAVES} alt="Reflexión" className="h-10 w-10 mb-2" />
                     Reflexión
                 </button>
              </div>
@@ -769,55 +776,31 @@ const styles = `
     @keyframes viewFadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
     .progress-ring__circle { transition: stroke-dashoffset 0.5s; transform: rotate(-90deg); transform-origin: 50% 50%; }
 
-    /* --- Animaciones de la nueva Splash Screen (REDISEÑADAS Y CALIBRADAS) --- */
+    /* --- Animaciones de la nueva Splash Screen (React-driven) --- */
     .animate-splashFadeOut { animation: splashFadeOut 0.5s ease-out 3.5s forwards; }
     @keyframes splashFadeOut { to { opacity: 0; visibility: hidden; } }
 
-    .splash-letter {
+    .splash-outer, .splash-middle {
         position: absolute;
         opacity: 0;
+        transition: opacity 0.5s ease-out, transform 0.8s cubic-bezier(0.76, 0, 0.24, 1);
     }
-    .splash-z { animation: z-anim 3s ease-out forwards; }
-    .splash-en { animation: en-anim 3s ease-out forwards; font-weight: 300; }
-    .splash-i { animation: i-anim 3s ease-out forwards; }
-    .splash-t { animation: t-anim 3s ease-out forwards; font-weight: 300; }
-
-    @keyframes z-anim {
-      0% { opacity: 0; transform: translateX(0); }
-      20% { opacity: 1; transform: translateX(0); }
-      60% { transform: translateX(-4.5rem); }
-      100% { opacity: 1; transform: translateX(-4.5rem); }
+    .splash-outer.visible, .splash-middle.visible {
+        opacity: 1;
     }
-    @keyframes en-anim {
-      40% { opacity: 0; }
-      70% { opacity: 1; }
-      100% { opacity: 1; }
+    .splash-outer.slide-z {
+        transform: translateX(-4.5rem);
     }
-    @keyframes i-anim {
-      0% { opacity: 0; transform: translateX(0); }
-      20% { opacity: 1; transform: translateX(0); }
-      60% { transform: translateX(1rem); }
-      100% { opacity: 1; transform: translateX(1rem); }
+    .splash-outer.slide-i {
+        transform: translateX(1rem);
     }
-     @keyframes t-anim {
-      40% { opacity: 0; }
-      70% { opacity: 1; }
-      100% { opacity: 1; }
-    }
-
-    .pillars-container { 
-        opacity: 0; 
-        transform: translateY(10px);
-        animation: fadeInPillars 1s ease-in-out 2.5s forwards; 
+    .splash-middle {
+        font-weight: 300;
     }
     .pillar-icon {
         width: 40px;
         height: 40px;
-        stroke: #64748B; /* slate-500 */
-    }
-    @keyframes fadeInPillars { 
-        from { opacity: 0; transform: translateY(10px); } 
-        to { opacity: 1; transform: translateY(0); } 
+        filter: invert(80%) sepia(10%) saturate(300%) hue-rotate(180deg) brightness(90%) contrast(90%);
     }
 `;
 
