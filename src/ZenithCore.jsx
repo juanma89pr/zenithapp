@@ -11,13 +11,16 @@ import {
     RecaptchaVerifier,
     signInWithPhoneNumber
 } from 'firebase/auth';
+// NOTA: Para que las animaciones funcionen, se necesita la librería 'framer-motion'.
+// En un proyecto real, se añadiría con 'npm install framer-motion'.
+// Aquí, la importamos para que el código sea correcto.
+import { motion } from "framer-motion";
 
 // --- Claves de API (YA INCLUIDAS) ---
 const EXERCISE_DB_API_KEY = '99af603688msh3ee0c9da98116e9p174272jsn3773c31651ff';
 const EDAMAM_APP_ID = '3909f263';
 const EDAMAM_APP_KEY = 'f4a2577d1045eaae9be42322e59e2d7d';
 const GOOGLE_FIT_CLIENT_ID = '99146745221-fgs0u4jhq62io786633bta1gln3kjdkj.apps.googleusercontent.com';
-
 
 // --- Configuración de Firebase (YA INCLUIDA) ---
 const firebaseConfig = {
@@ -30,50 +33,77 @@ const firebaseConfig = {
   measurementId: "G-SKG75K2RD1"
 };
 
-
-// --- Iconos (Solución Definitiva con Imágenes de Calidad) ---
+// --- Iconos (Imágenes de Calidad) ---
 const ICONS = {
     KETTLEBELL: 'https://i.ibb.co/L8y2zLp/kettlebell-icon.png',
     LEAF: 'https://i.ibb.co/bFzV0Jk/leaf-icon.png',
     WAVES: 'https://i.ibb.co/3cY4zvh/waves-icon.png'
 };
 
-
-// --- Pantalla de Bienvenida (Solución Definitiva) ---
+// --- Pantalla de Bienvenida con Framer Motion (Solución Profesional) ---
 const ZenItSplashScreen = () => {
-    const [visibleElements, setVisibleElements] = useState([]);
+    
+    // Variante para el contenedor del logo que orquesta la animación de sus hijos
+    const logoContainerVariants = {
+        hidden: {},
+        visible: {
+            transition: {
+                staggerChildren: 0.2 // Aplica un retraso de 0.2s entre cada letra
+            }
+        }
+    };
 
-    useEffect(() => {
-        const elements = ['Z', 'en', 'I', 't', 'icons'];
-        const timers = elements.map((el, index) => 
-            setTimeout(() => {
-                setVisibleElements(prev => [...prev, el]);
-            }, 300 * (index + 1))
-        );
-        return () => timers.forEach(clearTimeout);
-    }, []);
+    // Variante para cada letra del logo
+    const letterVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: { 
+            opacity: 1, 
+            y: 0,
+            transition: { type: "spring", stiffness: 100 }
+        }
+    };
+    
+    // Variante para los iconos de los pilares
+    const iconsVariants = {
+         hidden: { opacity: 0, scale: 0.5 },
+         visible: {
+             opacity: 1,
+             scale: 1,
+             transition: { delay: 1, duration: 0.5 }
+         }
+    };
 
     return (
-        <div className="fixed inset-0 bg-slate-900 flex flex-col justify-center items-center z-50 animate-splashFadeOut">
-            <div className="flex items-baseline text-7xl font-bold text-slate-200">
-                <span className={`splash-letter ${visibleElements.includes('Z') ? 'visible' : ''}`}>
-                    <span className="gleam-effect">Z</span>
-                </span>
-                <span className={`splash-letter splash-thin ${visibleElements.includes('en') ? 'visible' : ''}`}>en</span>
-                <span className={`splash-letter ${visibleElements.includes('I') ? 'visible' : ''}`}>
-                     <span className="gleam-effect">I</span>
-                </span>
-                <span className={`splash-letter splash-thin ${visibleElements.includes('t') ? 'visible' : ''}`}>t</span>
-            </div>
-            <div className={`flex justify-center gap-10 mt-8 transition-opacity duration-700 ${visibleElements.includes('icons') ? 'opacity-100' : 'opacity-0'}`}>
+        <motion.div 
+            className="fixed inset-0 bg-slate-900 flex flex-col justify-center items-center z-50"
+            initial={{ opacity: 1 }}
+            animate={{ opacity: 0 }}
+            transition={{ delay: 3, duration: 0.5 }}
+        >
+            <motion.div 
+                className="flex items-baseline text-7xl font-bold text-slate-200"
+                variants={logoContainerVariants}
+                initial="hidden"
+                animate="visible"
+            >
+                <motion.span variants={letterVariants} className="font-bold">Z</motion.span>
+                <motion.span variants={letterVariants} className="font-light">en</motion.span>
+                <motion.span variants={letterVariants} className="font-bold">I</motion.span>
+                <motion.span variants={letterVariants} className="font-light">t</motion.span>
+            </motion.div>
+            <motion.div 
+                className="flex justify-center gap-10 mt-8"
+                variants={iconsVariants}
+                initial="hidden"
+                animate="visible"
+            >
                 <img src={ICONS.KETTLEBELL} alt="Deporte" className="pillar-icon" />
                 <img src={ICONS.LEAF} alt="Nutrición" className="pillar-icon" />
                 <img src={ICONS.WAVES} alt="Mindfulness" className="pillar-icon" />
-            </div>
-        </div>
+            </motion.div>
+        </motion.div>
     );
 };
-
 
 // --- Componente Principal de la App ---
 export default function App() {
@@ -774,53 +804,15 @@ const NavBar = ({ activeView, setActiveView, onAddClick }) => {
     );
 };
 
-// --- Estilos de Animación (inyectados en el head) ---
+// --- Estilos Globales (inyectados en el head) ---
 const styles = `
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap');
     body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
     .animate-viewFadeIn { animation: viewFadeIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
     @keyframes viewFadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
     .progress-ring__circle { transition: stroke-dashoffset 0.5s; transform: rotate(-90deg); transform-origin: 50% 50%; }
-
-    /* --- Animaciones de la nueva Splash Screen (Solución Definitiva) --- */
-    .animate-splashFadeOut { animation: splashFadeOut 0.5s ease-out 3.0s forwards; }
-    @keyframes splashFadeOut { to { opacity: 0; visibility: hidden; } }
-
-    .splash-letter {
-        display: inline-block;
-        opacity: 0;
-        transition: opacity 0.5s ease-in-out;
-    }
-    .splash-letter.visible {
-        opacity: 1;
-    }
-    .splash-thin {
-        font-weight: 300;
-    }
     
-    .gleam-effect {
-        position: relative;
-        overflow: hidden;
-    }
-    .gleam-effect::after {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 20%;
-        height: 200%;
-        background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100%);
-        transform: rotate(25deg);
-        animation: gleam 2s ease-in-out 1.5s;
-        opacity: 0;
-    }
-    
-    @keyframes gleam {
-        0% { left: -50%; opacity: 0; }
-        50% { left: 130%; opacity: 1; }
-        100% { left: 130%; opacity: 0; }
-    }
-
+    /* Estilos para los iconos */
     .pillar-icon {
         width: 40px;
         height: 40px;
