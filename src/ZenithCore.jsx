@@ -11,10 +11,8 @@ import {
     RecaptchaVerifier,
     signInWithPhoneNumber
 } from 'firebase/auth';
-// NOTA: Para que las animaciones funcionen, se necesita la librería 'framer-motion'.
-// En un proyecto real, se añadiría con 'npm install framer-motion'.
-// Aquí, la importamos para que el código sea correcto.
-import { motion } from "framer-motion";
+// SOLUCIÓN: Importamos Framer Motion desde una CDN para resolver el error de despliegue.
+import { motion } from "https://cdn.skypack.dev/framer-motion";
 
 // --- Claves de API (YA INCLUIDAS) ---
 const EXERCISE_DB_API_KEY = '99af603688msh3ee0c9da98116e9p174272jsn3773c31651ff';
@@ -828,4 +826,5 @@ const styles = `
 const styleSheet = document.createElement("style");
 styleSheet.innerText = styles;
 document.head.appendChild(styleSheet);
+
 
