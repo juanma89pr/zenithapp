@@ -316,9 +316,9 @@ const NavBar = () => {
     const { activeView, setActiveView, openModal } = useAppStore();
     const navItems = [
         { id: 'inicio', label: 'Inicio', icon: <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/> },
-        { id: 'planes', label: 'Planes', icon: <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/> },
-        { id: 'progreso', label: 'Progreso', icon: <path d="M18 20V4"/><path d="M12 20V10"/><path d="M6 20V14"/> },
-        { id: 'perfil', label: 'Perfil', icon: <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/> }
+        { id: 'planes', label: 'Planes', icon: <><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/><path d="M10 9H8"/></> },
+        { id: 'progreso', label: 'Progreso', icon: <><path d="M18 20V4"/><path d="M12 20V10"/><path d="M6 20V14"/></> },
+        { id: 'perfil', label: 'Perfil', icon: <><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></> }
     ];
     return (
          <nav className="bg-slate-800/80 border-t border-slate-700 grid grid-cols-5 items-center sticky bottom-0 backdrop-blur-md">
@@ -417,4 +417,5 @@ const styles = `
 const styleSheet = document.createElement("style");
 styleSheet.innerText = styles;
 document.head.appendChild(styleSheet);
+
 
