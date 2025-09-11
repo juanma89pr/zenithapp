@@ -33,27 +33,29 @@ const firebaseConfig = {
 // --- Nueva Pantalla de Bienvenida (Splash Screen) con la animación ZenIt ---
 const ZenItSplashScreen = () => (
     <div className="fixed inset-0 bg-slate-900 flex flex-col justify-center items-center z-50 animate-splashFadeOut">
-        <div className="relative flex items-center justify-center text-7xl font-semibold text-slate-200" style={{ fontFeatureSettings: "'tnum' on, 'lnum' on" }}>
-            <span className="logo-middle logo-en">en</span>
-            <span className="logo-outer logo-z">Z</span>
-            <span className="logo-outer logo-i">I</span>
-            <span className="logo-middle logo-t">t</span>
+        <div className="relative h-20 w-64 flex items-center justify-center text-7xl font-semibold text-slate-200">
+            <span className="splash-letter splash-z">Z</span>
+            <span className="splash-letter splash-en">en</span>
+            <span className="splash-letter splash-i">I</span>
+            <span className="splash-letter splash-t">t</span>
         </div>
         <div className="flex justify-center gap-10 mt-8 pillars-container">
-            {/* Icono Deporte: Pulso dinámico */}
+            {/* Icono Deporte: Kettlebell */}
             <svg className="pillar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 12h4l3 8 4-16 3 8h4"></path>
+                <path d="M6.5 6.5a2.5 2.5 0 0 1 5 0V7h-5v-.5Z"/>
+                <path d="M12.5 6.5a2.5 2.5 0 0 1 5 0V7h-5v-.5Z"/>
+                <path d="M9 7v2.8a6.5 6.5 0 0 0-5 6.2 6.5 6.5 0 0 0 6.5 6.5h3A6.5 6.5 0 0 0 20 16a6.5 6.5 0 0 0-5-6.2V7"/>
+                <path d="M9 7h6"/>
             </svg>
-            {/* Icono Nutrición: Balance */}
+            {/* Icono Nutrición: Hoja */}
             <svg className="pillar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M12 2a10 10 0 0 0 0 20V2z" fill="currentColor" stroke="none"></path>
+                <path d="M2 22c4.42-4.42 4.42-11.58 0-16C6.42-2.42 13.58-2.42 18 2c4.42 4.42 4.42 11.58 0 16-4.42 4.42-11.58 4.42-16 0Z"/>
+                <path d="m15 9-6 6"/>
+                <path d="M16 14c.5-.5 1-1.5.5-2.5s-2-1-2.5.5"/>
             </svg>
             {/* Icono Mindfulness: Ondas de calma */}
             <svg className="pillar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="2" strokeOpacity="1"></circle>
-                <circle cx="12" cy="12" r="6" strokeOpacity="0.6"></circle>
-                <circle cx="12" cy="12" r="10" strokeOpacity="0.3"></circle>
+                 <path d="M3 12h.01"/><path d="M7 12h.01"/><path d="M11 12h.01"/><path d="M15 12h.01"/><path d="M19 12h.01"/>
             </svg>
         </div>
     </div>
@@ -83,8 +85,8 @@ export default function App() {
     });
 
     useEffect(() => {
-        // Duración de la nueva animación: 3.5 segundos
-        const timer = setTimeout(() => setShowSplash(false), 3500);
+        // Duración de la nueva animación: 4 segundos
+        const timer = setTimeout(() => setShowSplash(false), 4000);
         return () => clearTimeout(timer);
     }, []);
 
@@ -310,9 +312,18 @@ const AddModal = ({ onClose, openModal }) => (
         <div className="bg-slate-800 rounded-lg p-6 w-11/12 max-w-sm text-center" onClick={e => e.stopPropagation()}>
              <h2 className="text-xl font-bold text-white mb-6">¿Qué quieres registrar?</h2>
              <div className="space-y-4">
-                 <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-4 rounded-lg text-lg">🏃‍♂️ Entrenamiento</button>
-                 <button onClick={() => { onClose(); openModal('food_search'); }} className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-4 rounded-lg text-lg">🍎 Comida</button>
-                 <button onClick={() => { onClose(); openModal('reflection'); }} className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-4 px-4 rounded-lg text-lg">🧘‍♂️ Reflexión</button>
+                <button className="w-full flex flex-col items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-4 rounded-lg transition-colors border-b-4 border-blue-500">
+                     <svg className="h-10 w-10 mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6.5 6.5a2.5 2.5 0 0 1 5 0V7h-5v-.5Z"/><path d="M12.5 6.5a2.5 2.5 0 0 1 5 0V7h-5v-.5Z"/><path d="M9 7v2.8a6.5 6.5 0 0 0-5 6.2 6.5 6.5 0 0 0 6.5 6.5h3A6.5 6.5 0 0 0 20 16a6.5 6.5 0 0 0-5-6.2V7"/><path d="M9 7h6"/></svg>
+                     Entrenamiento
+                </button>
+                <button onClick={() => { onClose(); openModal('food_search'); }} className="w-full flex flex-col items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-4 rounded-lg transition-colors border-b-4 border-green-500">
+                    <svg className="h-10 w-10 mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M2 22c4.42-4.42 4.42-11.58 0-16C6.42-2.42 13.58-2.42 18 2c4.42 4.42 4.42 11.58 0 16-4.42 4.42-11.58 4.42-16 0Z"/><path d="m15 9-6 6"/><path d="M16 14c.5-.5 1-1.5.5-2.5s-2-1-2.5.5"/></svg>
+                    Comida
+                </button>
+                <button onClick={() => { onClose(); openModal('reflection'); }} className="w-full flex flex-col items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-4 rounded-lg transition-colors border-b-4 border-purple-500">
+                    <svg className="h-10 w-10 mb-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 12h.01"/><path d="M7 12h.01"/><path d="M11 12h.01"/><path d="M15 12h.01"/><path d="M19 12h.01"/></svg>
+                    Reflexión
+                </button>
              </div>
              <button onClick={onClose} className="mt-8 text-slate-400">Cancelar</button>
         </div>
@@ -758,42 +769,51 @@ const styles = `
     @keyframes viewFadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
     .progress-ring__circle { transition: stroke-dashoffset 0.5s; transform: rotate(-90deg); transform-origin: 50% 50%; }
 
-    /* --- Animaciones de la nueva Splash Screen (REDISEÑADAS) --- */
+    /* --- Animaciones de la nueva Splash Screen (REDISEÑADAS Y CALIBRADAS) --- */
     .animate-splashFadeOut { animation: splashFadeOut 0.5s ease-out 3.5s forwards; }
     @keyframes splashFadeOut { to { opacity: 0; visibility: hidden; } }
 
-    .logo-outer {
-        z-index: 10;
-        animation: slideOut 1.2s cubic-bezier(0.76, 0, 0.24, 1) 0.5s forwards;
-    }
-    .logo-z { --tx: -0.8em; } /* Distancia de movimiento para Z */
-    .logo-i { --tx: 0.8em; } /* Distancia de movimiento para I */
-    
-    .logo-middle {
+    .splash-letter {
+        position: absolute;
         opacity: 0;
-        font-weight: 300;
-        animation: fadeInMiddle 0.8s ease-out 1.5s forwards;
     }
-    
+    .splash-z { animation: z-anim 3s ease-out forwards; }
+    .splash-en { animation: en-anim 3s ease-out forwards; font-weight: 300; }
+    .splash-i { animation: i-anim 3s ease-out forwards; }
+    .splash-t { animation: t-anim 3s ease-out forwards; font-weight: 300; }
+
+    @keyframes z-anim {
+      0% { opacity: 0; transform: translateX(0); }
+      20% { opacity: 1; transform: translateX(0); }
+      60% { transform: translateX(-4.5rem); }
+      100% { opacity: 1; transform: translateX(-4.5rem); }
+    }
+    @keyframes en-anim {
+      40% { opacity: 0; }
+      70% { opacity: 1; }
+      100% { opacity: 1; }
+    }
+    @keyframes i-anim {
+      0% { opacity: 0; transform: translateX(0); }
+      20% { opacity: 1; transform: translateX(0); }
+      60% { transform: translateX(1rem); }
+      100% { opacity: 1; transform: translateX(1rem); }
+    }
+     @keyframes t-anim {
+      40% { opacity: 0; }
+      70% { opacity: 1; }
+      100% { opacity: 1; }
+    }
+
     .pillars-container { 
         opacity: 0; 
         transform: translateY(10px);
-        animation: fadeInPillars 1s ease-in-out 2.2s forwards; 
+        animation: fadeInPillars 1s ease-in-out 2.5s forwards; 
     }
     .pillar-icon {
         width: 40px;
         height: 40px;
         stroke: #64748B; /* slate-500 */
-        color: #64748B;
-    }
-
-    @keyframes slideOut {
-        from { transform: translateX(0); }
-        to { transform: translateX(var(--tx)); }
-    }
-    @keyframes fadeInMiddle {
-        from { opacity: 0; letter-spacing: -0.2em; }
-        to { opacity: 1; letter-spacing: normal; }
     }
     @keyframes fadeInPillars { 
         from { opacity: 0; transform: translateY(10px); } 
