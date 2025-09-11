@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, from 'react';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query } from 'firebase/firestore';
 import { 
@@ -19,7 +19,7 @@ const EDAMAM_APP_KEY = 'f4a2577d1045eaae9be42322e59e2d7d';
 const GOOGLE_FIT_CLIENT_ID = '99146745221-fgs0u4jhq62io786633bta1gln3kjdkj.apps.googleusercontent.com';
 
 
-// --- Configuración de Firebase (YA INCLUIDA) ---
+// --- Configuración de Firebase (NOTA: El proyecto sigue siendo el original de "zenith") ---
 const firebaseConfig = {
   apiKey: "AIzaSyAppsBCeiDUnVqqENzIYU1Te9jO49WsMeY",
   authDomain: "zenith-45e0b.firebaseapp.com",
@@ -29,6 +29,32 @@ const firebaseConfig = {
   appId: "1:99146745221:web:e1ad61c561916a0fa970ec",
   measurementId: "G-SKG75K2RD1"
 };
+
+// --- Nueva Pantalla de Bienvenida (Splash Screen) con la animación ZenIt ---
+const ZenItSplashScreen = () => (
+    <div className="fixed inset-0 bg-slate-900 flex flex-col justify-center items-center z-50 animate-splashFadeOut">
+        <div className="flex items-center justify-center text-7xl font-semibold text-slate-200">
+            <span className="logo-z">Z</span>
+            <span className="logo-en">en</span>
+            <span className="logo-i">I</span>
+            <span className="logo-t">t</span>
+        </div>
+        <div className="flex justify-center gap-10 mt-6 pillars-container">
+            {/* Icono: Deporte (Kettlebell) */}
+            <svg className="w-10 h-10 stroke-slate-500" viewBox="0 0 24 24" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M6 10H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M18 10h2a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2"></path><path d="M10 4h4"></path><rect x="4" y="10" width="16" height="10" rx="2"></rect>
+            </svg>
+            {/* Icono: Nutrición (Hoja) */}
+            <svg className="w-10 h-10 stroke-slate-500" viewBox="0 0 24 24" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M12 12c-3 0-5 2.5-5 5 0 1.5 1 3 3 3s3-1.5 3-3c0-2.5-2-5-5-5z"></path>
+            </svg>
+            {/* Icono: Mindfulness (Ondas de Calma) */}
+            <svg className="w-10 h-10 stroke-slate-500" viewBox="0 0 24 24" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 12h.01"></path><path d="M7 12h.01"></path><path d="M11 12h.01"></path><path d="M15 12h.01"></path><path d="M19 12h.01"></path>
+            </svg>
+        </div>
+    </div>
+);
 
 
 // --- Componente Principal de la App ---
@@ -54,7 +80,8 @@ export default function App() {
     });
 
     useEffect(() => {
-        const timer = setTimeout(() => setShowSplash(false), 3000);
+        // Duración de la nueva animación: 3.5 segundos
+        const timer = setTimeout(() => setShowSplash(false), 3500);
         return () => clearTimeout(timer);
     }, []);
 
@@ -100,7 +127,7 @@ export default function App() {
     const openModal = (type) => setModal({ type, isOpen: true });
     const closeModal = () => setModal({ type: null, isOpen: false });
 
-    if (showSplash) return <SplashScreen />;
+    if (showSplash) return <ZenItSplashScreen />;
     if (!authReady) return <div className="fixed inset-0 bg-slate-900 flex items-center justify-center z-50"><p className="text-white">Cargando...</p></div>;
     if (!user) return <LoginScreen auth={auth} />;
 
@@ -127,7 +154,7 @@ export default function App() {
     );
 }
 
-// --- PANTALLA DE LOGIN ---
+// --- PANTALLA DE LOGIN (ACTUALIZADA)---
 const LoginScreen = ({ auth }) => {
     const [loginView, setLoginView] = useState('options');
     const [email, setEmail] = useState('');
@@ -218,7 +245,9 @@ const LoginScreen = ({ auth }) => {
 
     return (
         <div className="max-w-md mx-auto h-screen flex flex-col justify-center items-center bg-slate-900 p-8">
-            <h1 className="text-5xl font-thin text-white tracking-[0.5em] mb-4">ZENITH</h1>
+            <h1 className="text-6xl font-semibold text-white mb-4">
+                <span className="font-bold">Z</span>en<span className="font-bold">I</span>t
+            </h1>
             <p className="text-slate-400 text-center mb-12">Empieza tu viaje hacia una mejor versión de ti mismo.</p>
             
             {error && <p className="bg-red-900/50 text-red-300 p-3 rounded-md mb-4 text-center">{error}</p>}
@@ -271,7 +300,8 @@ const LoginScreen = ({ auth }) => {
 };
 
 
-// --- MODALES ---
+// --- MODALES (RESTO DEL CÓDIGO SIN CAMBIOS, PEGADO DEBAJO) ---
+// ... (El resto del código de modales, vistas, widgets, etc. permanece igual)
 const AddModal = ({ onClose, openModal }) => (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-40" onClick={onClose}>
         <div className="bg-slate-800 rounded-lg p-6 w-11/12 max-w-sm text-center" onClick={e => e.stopPropagation()}>
@@ -288,7 +318,7 @@ const AddModal = ({ onClose, openModal }) => (
 const ReflectionModal = ({ onClose, db, user }) => {
     const [text, setText] = useState('');
     const [isSaving, setIsSaving] = useState(false);
-    const wordCount = useMemo(() => text.trim() === '' ? 0 : text.trim().split(/\s+/).length, [text]);
+    const wordCount = React.useMemo(() => text.trim() === '' ? 0 : text.trim().split(/\s+/).length, [text]);
 
     const handleSave = async () => {
         if (text.trim() === '' || !db || !user) return;
@@ -498,9 +528,6 @@ const FoodSearchModal = ({ onClose }) => {
         </div>
     );
 };
-
-
-// --- VISTAS Y COMPONENTES ---
 const MainContent = ({ activeView, greeting, connections, setConnections, openModal, routines, userName, activityData, setActivityData }) => (
     <main className="flex-grow p-6 overflow-y-auto">
         {activeView === 'inicio' && <DashboardView greeting={greeting} userName={userName} activityData={activityData} />}
@@ -536,15 +563,6 @@ const PlanesView = ({ onAddRoutine, routines }) => {
 };
 const ProgressView = () => (
     <div className="animate-viewFadeIn"><h1 className="text-3xl font-bold text-white mb-6">Progreso</h1><div className="space-y-6"><div className="bg-slate-800 p-6 rounded-lg text-center"><p className="text-slate-400">Gráficos de Entrenamiento y Nutrición.</p></div><div className="bg-slate-800 p-6 rounded-lg"><h2 className="text-sm font-semibold text-purple-400 mb-2">RESUMEN MENTAL MENSUAL</h2><div className="aspect-video bg-slate-700 rounded-md flex items-center justify-center"><p className="text-slate-500 text-sm">Tu mosaico de palabras aparecerá aquí.</p></div></div></div></div>
-);
-const SplashScreen = () => (
-    <div className="fixed inset-0 bg-slate-900 flex items-center justify-center z-50 p-4 w-full">
-        <h1 className="text-4xl sm:text-6xl font-thin text-white tracking-[0.5em] sm:tracking-[1em] text-center w-full">
-            {'ZENITH'.split('').map((letter, index) => (
-                <span key={index} className="opacity-0 animate-letterFadeIn" style={{ animationDelay: `${0.2 * (index + 1)}s` }}>{letter}</span>
-            ))}
-        </h1>
-    </div>
 );
 const DashboardView = ({ greeting, userName, activityData }) => (
     <div className="animate-viewFadeIn">
@@ -733,14 +751,26 @@ const NavBar = ({ activeView, setActiveView, onAddClick }) => {
 // --- Estilos de Animación (inyectados en el head) ---
 const styles = `
     body { font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
-    .animate-letterFadeIn { opacity: 0; animation: letterFadeIn 0.5s forwards; }
-    @keyframes letterFadeIn { to { opacity: 1; text-shadow: 0 0 15px rgba(255, 255, 255, 0.3); } }
     .animate-viewFadeIn { animation: viewFadeIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
     @keyframes viewFadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
     .progress-ring__circle { transition: stroke-dashoffset 0.5s; transform: rotate(-90deg); transform-origin: 50% 50%; }
+
+    /* --- Animaciones de la nueva Splash Screen --- */
+    .animate-splashFadeOut { animation: splashFadeOut 0.5s ease-out 3s forwards; }
+    @keyframes splashFadeOut { to { opacity: 0; } }
+
+    .logo-z, .logo-i { opacity: 0; animation: fadeIn 0.5s ease-in 0.1s forwards; }
+    .logo-en, .logo-t { opacity: 0; font-weight: 300; animation: fadeIn 0.5s ease-in 1.5s forwards; }
+    .logo-z { animation: fadeIn 0.5s ease-in 0.1s forwards, slideLeft 1s ease-in-out 0.5s forwards; }
+    .logo-i { animation: fadeIn 0.5s ease-in 0.1s forwards, slideRight 1s ease-in-out 0.5s forwards; }
+    .pillars-container { opacity: 0; animation: fadeInPillars 1s ease-in-out 2s forwards; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideLeft { to { transform: translateX(-0.7em); } }
+    @keyframes slideRight { to { transform: translateX(0.4em); } }
+    @keyframes fadeInPillars { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 `;
 
 const styleSheet = document.createElement("style");
 styleSheet.innerText = styles;
 document.head.appendChild(styleSheet);
-
