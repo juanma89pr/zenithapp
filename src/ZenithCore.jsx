@@ -33,24 +33,27 @@ const firebaseConfig = {
 // --- Nueva Pantalla de Bienvenida (Splash Screen) con la animación ZenIt ---
 const ZenItSplashScreen = () => (
     <div className="fixed inset-0 bg-slate-900 flex flex-col justify-center items-center z-50 animate-splashFadeOut">
-        <div className="flex items-center justify-center text-7xl font-semibold text-slate-200">
-            <span className="logo-z">Z</span>
-            <span className="logo-en">en</span>
-            <span className="logo-i">I</span>
-            <span className="logo-t">t</span>
+        <div className="relative flex items-center justify-center text-7xl font-semibold text-slate-200" style={{ fontFeatureSettings: "'tnum' on, 'lnum' on" }}>
+            <span className="logo-middle logo-en">en</span>
+            <span className="logo-outer logo-z">Z</span>
+            <span className="logo-outer logo-i">I</span>
+            <span className="logo-middle logo-t">t</span>
         </div>
-        <div className="flex justify-center gap-10 mt-6 pillars-container">
-            {/* Icono: Deporte (Kettlebell) */}
-            <svg className="w-10 h-10 stroke-slate-500" viewBox="0 0 24 24" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M6 10H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path><path d="M18 10h2a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2"></path><path d="M10 4h4"></path><rect x="4" y="10" width="16" height="10" rx="2"></rect>
+        <div className="flex justify-center gap-10 mt-8 pillars-container">
+            {/* Icono Deporte: Pulso dinámico */}
+            <svg className="pillar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 12h4l3 8 4-16 3 8h4"></path>
             </svg>
-            {/* Icono: Nutrición (Hoja) */}
-            <svg className="w-10 h-10 stroke-slate-500" viewBox="0 0 24 24" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"></path><path d="M12 12c-3 0-5 2.5-5 5 0 1.5 1 3 3 3s3-1.5 3-3c0-2.5-2-5-5-5z"></path>
+            {/* Icono Nutrición: Balance */}
+            <svg className="pillar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 2a10 10 0 0 0 0 20V2z" fill="currentColor" stroke="none"></path>
             </svg>
-            {/* Icono: Mindfulness (Ondas de Calma) */}
-            <svg className="w-10 h-10 stroke-slate-500" viewBox="0 0 24 24" fill="none" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 12h.01"></path><path d="M7 12h.01"></path><path d="M11 12h.01"></path><path d="M15 12h.01"></path><path d="M19 12h.01"></path>
+            {/* Icono Mindfulness: Ondas de calma */}
+            <svg className="pillar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="2" strokeOpacity="1"></circle>
+                <circle cx="12" cy="12" r="6" strokeOpacity="0.6"></circle>
+                <circle cx="12" cy="12" r="10" strokeOpacity="0.3"></circle>
             </svg>
         </div>
     </div>
@@ -755,20 +758,47 @@ const styles = `
     @keyframes viewFadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
     .progress-ring__circle { transition: stroke-dashoffset 0.5s; transform: rotate(-90deg); transform-origin: 50% 50%; }
 
-    /* --- Animaciones de la nueva Splash Screen --- */
-    .animate-splashFadeOut { animation: splashFadeOut 0.5s ease-out 3s forwards; }
-    @keyframes splashFadeOut { to { opacity: 0; } }
+    /* --- Animaciones de la nueva Splash Screen (REDISEÑADAS) --- */
+    .animate-splashFadeOut { animation: splashFadeOut 0.5s ease-out 3.5s forwards; }
+    @keyframes splashFadeOut { to { opacity: 0; visibility: hidden; } }
 
-    .logo-z, .logo-i { opacity: 0; animation: fadeIn 0.5s ease-in 0.1s forwards; }
-    .logo-en, .logo-t { opacity: 0; font-weight: 300; animation: fadeIn 0.5s ease-in 1.5s forwards; }
-    .logo-z { animation: fadeIn 0.5s ease-in 0.1s forwards, slideLeft 1s ease-in-out 0.5s forwards; }
-    .logo-i { animation: fadeIn 0.5s ease-in 0.1s forwards, slideRight 1s ease-in-out 0.5s forwards; }
-    .pillars-container { opacity: 0; animation: fadeInPillars 1s ease-in-out 2s forwards; }
+    .logo-outer {
+        z-index: 10;
+        animation: slideOut 1.2s cubic-bezier(0.76, 0, 0.24, 1) 0.5s forwards;
+    }
+    .logo-z { --tx: -0.8em; } /* Distancia de movimiento para Z */
+    .logo-i { --tx: 0.8em; } /* Distancia de movimiento para I */
+    
+    .logo-middle {
+        opacity: 0;
+        font-weight: 300;
+        animation: fadeInMiddle 0.8s ease-out 1.5s forwards;
+    }
+    
+    .pillars-container { 
+        opacity: 0; 
+        transform: translateY(10px);
+        animation: fadeInPillars 1s ease-in-out 2.2s forwards; 
+    }
+    .pillar-icon {
+        width: 40px;
+        height: 40px;
+        stroke: #64748B; /* slate-500 */
+        color: #64748B;
+    }
 
-    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes slideLeft { to { transform: translateX(-0.7em); } }
-    @keyframes slideRight { to { transform: translateX(0.4em); } }
-    @keyframes fadeInPillars { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideOut {
+        from { transform: translateX(0); }
+        to { transform: translateX(var(--tx)); }
+    }
+    @keyframes fadeInMiddle {
+        from { opacity: 0; letter-spacing: -0.2em; }
+        to { opacity: 1; letter-spacing: normal; }
+    }
+    @keyframes fadeInPillars { 
+        from { opacity: 0; transform: translateY(10px); } 
+        to { opacity: 1; transform: translateY(0); } 
+    }
 `;
 
 const styleSheet = document.createElement("style");
