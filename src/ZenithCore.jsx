@@ -29,11 +29,11 @@ const firebaseConfig = {
   measurementId: "G-SKG75K2RD1"
 };
 
-// --- Iconos (Imágenes de Calidad) ---
+// --- Iconos (Solución Definitiva con URLs de Imágenes Verificadas) ---
 const ICONS = {
-    KETTLEBELL: 'https://i.ibb.co/L8y2zLp/kettlebell-icon.png',
-    LEAF: 'https://i.ibb.co/bFzV0Jk/leaf-icon.png',
-    WAVES: 'https://i.ibb.co/3cY4zvh/waves-icon.png'
+    KETTLEBELL: 'https://i.ibb.co/dK2g4zR/zenit-kettlebell.png',
+    LEAF: 'https://i.ibb.co/yfBJvCg/zenit-leaf.png',
+    WAVES: 'https://i.ibb.co/2nHN342/zenit-waves.png'
 };
 
 // --- Pantalla de Bienvenida con CSS Puro (Solución Robusta) ---
@@ -802,4 +802,5 @@ const styles = `
 const styleSheet = document.createElement("style");
 styleSheet.innerText = styles;
 document.head.appendChild(styleSheet);
+
 
