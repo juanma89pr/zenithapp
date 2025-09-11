@@ -30,40 +30,53 @@ const firebaseConfig = {
   measurementId: "G-SKG75K2RD1"
 };
 
-// --- URLs de los iconos PNG (reemplazar con tus PNG finales) ---
-const ICON_URLS = {
-    KETTLEBELL: 'https://i.ibb.co/L8y2zLp/kettlebell-icon.png', // 
-    LEAF: 'https://i.ibb.co/bFzV0Jk/leaf-icon.png', // 
-    WAVES: 'https://i.ibb.co/3cY4zvh/waves-icon.png' // 
+
+// --- Iconos SVG Profesionales (Solución Definitiva) ---
+const ICONS = {
+    KETTLEBELL: (props) => (
+        <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M6.5 6.5a2.5 2.5 0 0 1 5 0V7h-5v-.5Z"/><path d="M12.5 6.5a2.5 2.5 0 0 1 5 0V7h-5v-.5Z"/><path d="M9 7v2.8a6.5 6.5 0 0 0-5 6.2 6.5 6.5 0 0 0 6.5 6.5h3A6.5 6.5 0 0 0 20 16a6.5 6.5 0 0 0-5-6.2V7"/><path d="M9 7h6"/>
+        </svg>
+    ),
+    LEAF: (props) => (
+        <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M2 22c4.42-4.42 4.42-11.58 0-16C6.42-2.42 13.58-2.42 18 2c4.42 4.42 4.42 11.58 0 16-4.42 4.42-11.58 4.42-16 0Z"/><path d="m15 9-6 6"/><path d="M16 14c.5-.5 1-1.5.5-2.5s-2-1-2.5.5"/>
+        </svg>
+    ),
+    WAVES: (props) => (
+        <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M3 12h.01"/><path d="M7 12h.01"/><path d="M11 12h.01"/><path d="M15 12h.01"/><path d="M19 12h.01"/>
+        </svg>
+    )
 };
 
 
-// --- Pantalla de Bienvenida con Animación React ---
+// --- Pantalla de Bienvenida con Animación React (Solución Definitiva) ---
 const ZenItSplashScreen = () => {
-    const [animationStep, setAnimationStep] = useState(0);
+    const [visibleElements, setVisibleElements] = useState([]);
 
     useEffect(() => {
-        const timers = [
-            setTimeout(() => setAnimationStep(1), 100),    // Z e I aparecen
-            setTimeout(() => setAnimationStep(2), 800),   // Z e I se deslizan
-            setTimeout(() => setAnimationStep(3), 1500),  // en y t aparecen
-            setTimeout(() => setAnimationStep(4), 2500)   // Iconos aparecen
-        ];
+        const elements = ['Z', 'en', 'I', 't', 'icons'];
+        const timers = elements.map((el, index) => 
+            setTimeout(() => {
+                setVisibleElements(prev => [...prev, el]);
+            }, 300 * (index + 1))
+        );
         return () => timers.forEach(clearTimeout);
     }, []);
 
     return (
         <div className="fixed inset-0 bg-slate-900 flex flex-col justify-center items-center z-50 animate-splashFadeOut">
-            <div className="relative h-20 w-64 flex items-center justify-center text-7xl font-semibold text-slate-200">
-                <span className={`splash-outer ${animationStep >= 1 ? 'visible' : ''} ${animationStep >= 2 ? 'slide-z' : ''}`}>Z</span>
-                <span className={`splash-middle ${animationStep >= 3 ? 'visible' : ''}`}>en</span>
-                <span className={`splash-outer ${animationStep >= 1 ? 'visible' : ''} ${animationStep >= 2 ? 'slide-i' : ''}`}>I</span>
-                <span className={`splash-middle ${animationStep >= 3 ? 'visible' : ''}`}>t</span>
+            <div className="flex items-baseline text-7xl font-semibold text-slate-200">
+                <span className={`splash-letter ${visibleElements.includes('Z') ? 'visible' : ''}`}>Z</span>
+                <span className={`splash-letter splash-thin ${visibleElements.includes('en') ? 'visible' : ''}`}>en</span>
+                <span className={`splash-letter ${visibleElements.includes('I') ? 'visible' : ''}`}>I</span>
+                <span className={`splash-letter splash-thin ${visibleElements.includes('t') ? 'visible' : ''}`}>t</span>
             </div>
-            <div className={`flex justify-center gap-10 mt-8 transition-opacity duration-700 ${animationStep >= 4 ? 'opacity-100' : 'opacity-0'}`}>
-                <img src={ICON_URLS.KETTLEBELL} alt="Deporte" className="pillar-icon" />
-                <img src={ICON_URLS.LEAF} alt="Nutrición" className="pillar-icon" />
-                <img src={ICON_URLS.WAVES} alt="Mindfulness" className="pillar-icon" />
+            <div className={`flex justify-center gap-10 mt-8 transition-opacity duration-700 ${visibleElements.includes('icons') ? 'opacity-100' : 'opacity-0'}`}>
+                <ICONS.KETTLEBELL className="pillar-icon" />
+                <ICONS.LEAF className="pillar-icon" />
+                <ICONS.WAVES className="pillar-icon" />
             </div>
         </div>
     );
@@ -93,8 +106,8 @@ export default function App() {
     });
 
     useEffect(() => {
-        // Duración de la animación: 4 segundos
-        const timer = setTimeout(() => setShowSplash(false), 4000);
+        // Duración de la animación: 3.5 segundos
+        const timer = setTimeout(() => setShowSplash(false), 3500);
         return () => clearTimeout(timer);
     }, []);
 
@@ -313,22 +326,22 @@ const LoginScreen = ({ auth }) => {
 };
 
 
-// --- MODALES (CON ICONOS PNG ACTUALIZADOS) ---
+// --- MODALES (CON ICONOS SVG PROFESIONALES) ---
 const AddModal = ({ onClose, openModal }) => (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-40" onClick={onClose}>
         <div className="bg-slate-800 rounded-lg p-6 w-11/12 max-w-sm text-center" onClick={e => e.stopPropagation()}>
              <h2 className="text-xl font-bold text-white mb-6">¿Qué quieres registrar?</h2>
              <div className="space-y-4">
                 <button className="w-full flex flex-col items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-4 rounded-lg transition-colors border-b-4 border-blue-500">
-                     <img src={ICON_URLS.KETTLEBELL} alt="Entrenamiento" className="h-10 w-10 mb-2" />
+                     <ICONS.KETTLEBELL className="h-10 w-10 mb-2" />
                      Entrenamiento
                 </button>
                 <button onClick={() => { onClose(); openModal('food_search'); }} className="w-full flex flex-col items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-4 rounded-lg transition-colors border-b-4 border-green-500">
-                    <img src={ICON_URLS.LEAF} alt="Comida" className="h-10 w-10 mb-2" />
+                    <ICONS.LEAF className="h-10 w-10 mb-2" />
                     Comida
                 </button>
                 <button onClick={() => { onClose(); openModal('reflection'); }} className="w-full flex flex-col items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-4 rounded-lg transition-colors border-b-4 border-purple-500">
-                    <img src={ICON_URLS.WAVES} alt="Reflexión" className="h-10 w-10 mb-2" />
+                    <ICONS.WAVES className="h-10 w-10 mb-2" />
                     Reflexión
                 </button>
              </div>
@@ -776,31 +789,25 @@ const styles = `
     @keyframes viewFadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
     .progress-ring__circle { transition: stroke-dashoffset 0.5s; transform: rotate(-90deg); transform-origin: 50% 50%; }
 
-    /* --- Animaciones de la nueva Splash Screen (React-driven) --- */
-    .animate-splashFadeOut { animation: splashFadeOut 0.5s ease-out 3.5s forwards; }
+    /* --- Animaciones de la nueva Splash Screen (Solución Definitiva) --- */
+    .animate-splashFadeOut { animation: splashFadeOut 0.5s ease-out 3.0s forwards; }
     @keyframes splashFadeOut { to { opacity: 0; visibility: hidden; } }
 
-    .splash-outer, .splash-middle {
-        position: absolute;
+    .splash-letter {
         opacity: 0;
-        transition: opacity 0.5s ease-out, transform 0.8s cubic-bezier(0.76, 0, 0.24, 1);
+        transition: opacity 0.5s ease-in-out;
     }
-    .splash-outer.visible, .splash-middle.visible {
+    .splash-letter.visible {
         opacity: 1;
     }
-    .splash-outer.slide-z {
-        transform: translateX(-4.5rem);
-    }
-    .splash-outer.slide-i {
-        transform: translateX(1rem);
-    }
-    .splash-middle {
+    .splash-thin {
         font-weight: 300;
     }
+
     .pillar-icon {
         width: 40px;
         height: 40px;
-        filter: invert(80%) sepia(10%) saturate(300%) hue-rotate(180deg) brightness(90%) contrast(90%);
+        stroke: #94a3b8; /* slate-400 */
     }
 `;
 
