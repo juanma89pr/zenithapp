@@ -1,4 +1,4 @@
-import React, from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, query } from 'firebase/firestore';
 import { 
@@ -318,7 +318,7 @@ const AddModal = ({ onClose, openModal }) => (
 const ReflectionModal = ({ onClose, db, user }) => {
     const [text, setText] = useState('');
     const [isSaving, setIsSaving] = useState(false);
-    const wordCount = React.useMemo(() => text.trim() === '' ? 0 : text.trim().split(/\s+/).length, [text]);
+    const wordCount = useMemo(() => text.trim() === '' ? 0 : text.trim().split(/\s+/).length, [text]);
 
     const handleSave = async () => {
         if (text.trim() === '' || !db || !user) return;
@@ -774,3 +774,4 @@ const styles = `
 const styleSheet = document.createElement("style");
 styleSheet.innerText = styles;
 document.head.appendChild(styleSheet);
+
