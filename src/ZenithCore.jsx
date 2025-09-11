@@ -29,11 +29,11 @@ const firebaseConfig = {
   measurementId: "G-SKG75K2RD1"
 };
 
-// --- Iconos (Solución Definitiva con URLs de Imágenes Verificadas) ---
+// --- Iconos (Solución Definitiva con TUS Imágenes) ---
 const ICONS = {
-    KETTLEBELL: 'https://i.ibb.co/dK2g4zR/zenit-kettlebell.png',
-    LEAF: 'https://i.ibb.co/yfBJvCg/zenit-leaf.png',
-    WAVES: 'https://i.ibb.co/2nHN342/zenit-waves.png'
+    KETTLEBELL: 'https://i.ibb.co/f2SpwD4/zenit-kettlebell-final.png', // Tu icono de Deporte
+    LEAF: 'https://i.ibb.co/z5pQ4g7/zenit-leaf-final.png',             // Tu icono de Nutrición
+    WAVES: 'https://i.ibb.co/JqDBK3s/zenit-waves-final.png'              // Tu icono de Mindfulness
 };
 
 // --- Pantalla de Bienvenida con CSS Puro (Solución Robusta) ---
@@ -298,7 +298,7 @@ const LoginScreen = ({ auth }) => {
 };
 
 
-// --- MODALES (CON IMÁGENES DE CALIDAD) ---
+// --- MODALES (CON TUS IMÁGENES) ---
 const AddModal = ({ onClose, openModal }) => (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-40" onClick={onClose}>
         <div className="bg-slate-800 rounded-lg p-6 w-11/12 max-w-sm text-center" onClick={e => e.stopPropagation()}>
@@ -802,5 +802,4 @@ const styles = `
 const styleSheet = document.createElement("style");
 styleSheet.innerText = styles;
 document.head.appendChild(styleSheet);
-
 
