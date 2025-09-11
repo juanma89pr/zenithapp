@@ -11,8 +11,6 @@ import {
     RecaptchaVerifier,
     signInWithPhoneNumber
 } from 'firebase/auth';
-// SOLUCIÓN: Importamos Framer Motion desde una CDN para resolver el error de despliegue.
-import { motion } from "https://cdn.skypack.dev/framer-motion";
 
 // --- Claves de API (YA INCLUIDAS) ---
 const EXERCISE_DB_API_KEY = '99af603688msh3ee0c9da98116e9p174272jsn3773c31651ff';
@@ -38,68 +36,22 @@ const ICONS = {
     WAVES: 'https://i.ibb.co/3cY4zvh/waves-icon.png'
 };
 
-// --- Pantalla de Bienvenida con Framer Motion (Solución Profesional) ---
+// --- Pantalla de Bienvenida con CSS Puro (Solución Robusta) ---
 const ZenItSplashScreen = () => {
-    
-    // Variante para el contenedor del logo que orquesta la animación de sus hijos
-    const logoContainerVariants = {
-        hidden: {},
-        visible: {
-            transition: {
-                staggerChildren: 0.2 // Aplica un retraso de 0.2s entre cada letra
-            }
-        }
-    };
-
-    // Variante para cada letra del logo
-    const letterVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: { 
-            opacity: 1, 
-            y: 0,
-            transition: { type: "spring", stiffness: 100 }
-        }
-    };
-    
-    // Variante para los iconos de los pilares
-    const iconsVariants = {
-         hidden: { opacity: 0, scale: 0.5 },
-         visible: {
-             opacity: 1,
-             scale: 1,
-             transition: { delay: 1, duration: 0.5 }
-         }
-    };
-
     return (
-        <motion.div 
-            className="fixed inset-0 bg-slate-900 flex flex-col justify-center items-center z-50"
-            initial={{ opacity: 1 }}
-            animate={{ opacity: 0 }}
-            transition={{ delay: 3, duration: 0.5 }}
-        >
-            <motion.div 
-                className="flex items-baseline text-7xl font-bold text-slate-200"
-                variants={logoContainerVariants}
-                initial="hidden"
-                animate="visible"
-            >
-                <motion.span variants={letterVariants} className="font-bold">Z</motion.span>
-                <motion.span variants={letterVariants} className="font-light">en</motion.span>
-                <motion.span variants={letterVariants} className="font-bold">I</motion.span>
-                <motion.span variants={letterVariants} className="font-light">t</motion.span>
-            </motion.div>
-            <motion.div 
-                className="flex justify-center gap-10 mt-8"
-                variants={iconsVariants}
-                initial="hidden"
-                animate="visible"
-            >
+        <div className="fixed inset-0 bg-slate-900 flex flex-col justify-center items-center z-50 splash-container">
+            <div className="flex items-baseline text-7xl font-bold text-slate-200">
+                <span className="splash-letter" style={{ animationDelay: '0.2s' }}>Z</span>
+                <span className="splash-letter font-light" style={{ animationDelay: '0.4s' }}>en</span>
+                <span className="splash-letter" style={{ animationDelay: '0.6s' }}>I</span>
+                <span className="splash-letter font-light" style={{ animationDelay: '0.8s' }}>t</span>
+            </div>
+            <div className="flex justify-center gap-10 mt-8 splash-icons" style={{ animationDelay: '1.2s' }}>
                 <img src={ICONS.KETTLEBELL} alt="Deporte" className="pillar-icon" />
                 <img src={ICONS.LEAF} alt="Nutrición" className="pillar-icon" />
                 <img src={ICONS.WAVES} alt="Mindfulness" className="pillar-icon" />
-            </motion.div>
-        </motion.div>
+            </div>
+        </div>
     );
 };
 
@@ -810,6 +762,30 @@ const styles = `
     @keyframes viewFadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
     .progress-ring__circle { transition: stroke-dashoffset 0.5s; transform: rotate(-90deg); transform-origin: 50% 50%; }
     
+    /* SOLUCIÓN: Animación de Splash Screen con CSS Puro */
+    .splash-container {
+        animation: fadeOut 0.5s ease-out 3.0s forwards;
+    }
+    .splash-letter, .splash-icons {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeIn 0.6s ease-out forwards;
+    }
+    
+    @keyframes fadeIn {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes fadeOut {
+        to {
+            opacity: 0;
+            visibility: hidden;
+        }
+    }
+
     /* Estilos para los iconos */
     .pillar-icon {
         width: 40px;
@@ -826,5 +802,4 @@ const styles = `
 const styleSheet = document.createElement("style");
 styleSheet.innerText = styles;
 document.head.appendChild(styleSheet);
-
 
