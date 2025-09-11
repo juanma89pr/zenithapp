@@ -12,14 +12,14 @@ import {
     signInWithPhoneNumber
 } from 'firebase/auth';
 
-// --- Claves de API (Insertadas directamente para el despliegue inicial) ---
+// --- Claves de API (YA INCLUIDAS) ---
 const EXERCISE_DB_API_KEY = '99af603688msh3ee0c9da98116e9p174272jsn3773c31651ff';
 const EDAMAM_APP_ID = '3909f263';
 const EDAMAM_APP_KEY = 'f4a2577d1045eaae9be42322e59e2d7d';
 const GOOGLE_FIT_CLIENT_ID = '99146745221-fgs0u4jhq62io786633bta1gln3kjdkj.apps.googleusercontent.com';
 
 
-// --- Configuración de Firebase (NOTA: El proyecto sigue siendo el original de "zenith") ---
+// --- Configuración de Firebase (YA INCLUIDA) ---
 const firebaseConfig = {
   apiKey: "AIzaSyAppsBCeiDUnVqqENzIYU1Te9jO49WsMeY",
   authDomain: "zenith-45e0b.firebaseapp.com",
@@ -31,27 +31,15 @@ const firebaseConfig = {
 };
 
 
-// --- Iconos SVG Profesionales (Solución Definitiva) ---
+// --- Iconos (Solución Definitiva con Imágenes de Calidad) ---
 const ICONS = {
-    KETTLEBELL: (props) => (
-        <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M6.5 6.5a2.5 2.5 0 0 1 5 0V7h-5v-.5Z"/><path d="M12.5 6.5a2.5 2.5 0 0 1 5 0V7h-5v-.5Z"/><path d="M9 7v2.8a6.5 6.5 0 0 0-5 6.2 6.5 6.5 0 0 0 6.5 6.5h3A6.5 6.5 0 0 0 20 16a6.5 6.5 0 0 0-5-6.2V7"/><path d="M9 7h6"/>
-        </svg>
-    ),
-    LEAF: (props) => (
-        <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M2 22c4.42-4.42 4.42-11.58 0-16C6.42-2.42 13.58-2.42 18 2c4.42 4.42 4.42 11.58 0 16-4.42 4.42-11.58 4.42-16 0Z"/><path d="m15 9-6 6"/><path d="M16 14c.5-.5 1-1.5.5-2.5s-2-1-2.5.5"/>
-        </svg>
-    ),
-    WAVES: (props) => (
-        <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M3 12h.01"/><path d="M7 12h.01"/><path d="M11 12h.01"/><path d="M15 12h.01"/><path d="M19 12h.01"/>
-        </svg>
-    )
+    KETTLEBELL: 'https://i.ibb.co/L8y2zLp/kettlebell-icon.png',
+    LEAF: 'https://i.ibb.co/bFzV0Jk/leaf-icon.png',
+    WAVES: 'https://i.ibb.co/3cY4zvh/waves-icon.png'
 };
 
 
-// --- Pantalla de Bienvenida con Animación React (Solución Definitiva) ---
+// --- Pantalla de Bienvenida (Solución Definitiva) ---
 const ZenItSplashScreen = () => {
     const [visibleElements, setVisibleElements] = useState([]);
 
@@ -67,16 +55,20 @@ const ZenItSplashScreen = () => {
 
     return (
         <div className="fixed inset-0 bg-slate-900 flex flex-col justify-center items-center z-50 animate-splashFadeOut">
-            <div className="flex items-baseline text-7xl font-semibold text-slate-200">
-                <span className={`splash-letter ${visibleElements.includes('Z') ? 'visible' : ''}`}>Z</span>
+            <div className="flex items-baseline text-7xl font-bold text-slate-200">
+                <span className={`splash-letter ${visibleElements.includes('Z') ? 'visible' : ''}`}>
+                    <span className="gleam-effect">Z</span>
+                </span>
                 <span className={`splash-letter splash-thin ${visibleElements.includes('en') ? 'visible' : ''}`}>en</span>
-                <span className={`splash-letter ${visibleElements.includes('I') ? 'visible' : ''}`}>I</span>
+                <span className={`splash-letter ${visibleElements.includes('I') ? 'visible' : ''}`}>
+                     <span className="gleam-effect">I</span>
+                </span>
                 <span className={`splash-letter splash-thin ${visibleElements.includes('t') ? 'visible' : ''}`}>t</span>
             </div>
             <div className={`flex justify-center gap-10 mt-8 transition-opacity duration-700 ${visibleElements.includes('icons') ? 'opacity-100' : 'opacity-0'}`}>
-                <ICONS.KETTLEBELL className="pillar-icon" />
-                <ICONS.LEAF className="pillar-icon" />
-                <ICONS.WAVES className="pillar-icon" />
+                <img src={ICONS.KETTLEBELL} alt="Deporte" className="pillar-icon" />
+                <img src={ICONS.LEAF} alt="Nutrición" className="pillar-icon" />
+                <img src={ICONS.WAVES} alt="Mindfulness" className="pillar-icon" />
             </div>
         </div>
     );
@@ -180,7 +172,7 @@ export default function App() {
     );
 }
 
-// --- PANTALLA DE LOGIN (ACTUALIZADA)---
+// --- PANTALLA DE LOGIN ---
 const LoginScreen = ({ auth }) => {
     const [loginView, setLoginView] = useState('options');
     const [email, setEmail] = useState('');
@@ -326,22 +318,22 @@ const LoginScreen = ({ auth }) => {
 };
 
 
-// --- MODALES (CON ICONOS SVG PROFESIONALES) ---
+// --- MODALES (CON IMÁGENES DE CALIDAD) ---
 const AddModal = ({ onClose, openModal }) => (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-40" onClick={onClose}>
         <div className="bg-slate-800 rounded-lg p-6 w-11/12 max-w-sm text-center" onClick={e => e.stopPropagation()}>
              <h2 className="text-xl font-bold text-white mb-6">¿Qué quieres registrar?</h2>
              <div className="space-y-4">
                 <button className="w-full flex flex-col items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-4 rounded-lg transition-colors border-b-4 border-blue-500">
-                     <ICONS.KETTLEBELL className="h-10 w-10 mb-2" />
+                     <img src={ICONS.KETTLEBELL} alt="Entrenamiento" className="h-10 w-10 mb-2 pillar-icon-modal" />
                      Entrenamiento
                 </button>
                 <button onClick={() => { onClose(); openModal('food_search'); }} className="w-full flex flex-col items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-4 rounded-lg transition-colors border-b-4 border-green-500">
-                    <ICONS.LEAF className="h-10 w-10 mb-2" />
+                    <img src={ICONS.LEAF} alt="Comida" className="h-10 w-10 mb-2 pillar-icon-modal" />
                     Comida
                 </button>
                 <button onClick={() => { onClose(); openModal('reflection'); }} className="w-full flex flex-col items-center justify-center bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-4 rounded-lg transition-colors border-b-4 border-purple-500">
-                    <ICONS.WAVES className="h-10 w-10 mb-2" />
+                    <img src={ICONS.WAVES} alt="Reflexión" className="h-10 w-10 mb-2 pillar-icon-modal" />
                     Reflexión
                 </button>
              </div>
@@ -784,7 +776,8 @@ const NavBar = ({ activeView, setActiveView, onAddClick }) => {
 
 // --- Estilos de Animación (inyectados en el head) ---
 const styles = `
-    body { font-family: 'Poppins', sans-serif; -webkit-tap-highlight-color: transparent; }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap');
+    body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
     .animate-viewFadeIn { animation: viewFadeIn 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
     @keyframes viewFadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
     .progress-ring__circle { transition: stroke-dashoffset 0.5s; transform: rotate(-90deg); transform-origin: 50% 50%; }
@@ -794,6 +787,7 @@ const styles = `
     @keyframes splashFadeOut { to { opacity: 0; visibility: hidden; } }
 
     .splash-letter {
+        display: inline-block;
         opacity: 0;
         transition: opacity 0.5s ease-in-out;
     }
@@ -803,11 +797,39 @@ const styles = `
     .splash-thin {
         font-weight: 300;
     }
+    
+    .gleam-effect {
+        position: relative;
+        overflow: hidden;
+    }
+    .gleam-effect::after {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 20%;
+        height: 200%;
+        background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0) 100%);
+        transform: rotate(25deg);
+        animation: gleam 2s ease-in-out 1.5s;
+        opacity: 0;
+    }
+    
+    @keyframes gleam {
+        0% { left: -50%; opacity: 0; }
+        50% { left: 130%; opacity: 1; }
+        100% { left: 130%; opacity: 0; }
+    }
 
     .pillar-icon {
         width: 40px;
         height: 40px;
-        stroke: #94a3b8; /* slate-400 */
+        filter: invert(90%) sepia(10%) saturate(100%) hue-rotate(180deg) brightness(100%) contrast(90%);
+    }
+    .pillar-icon-modal {
+         width: 40px;
+        height: 40px;
+        filter: invert(90%) sepia(10%) saturate(100%) hue-rotate(180deg) brightness(100%) contrast(90%);
     }
 `;
 
